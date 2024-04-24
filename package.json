@@ -2,7 +2,10 @@
   "name": "@my-workspace/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "build": "nx build",
+    "start": "nx serve gruber-be"
+  },
   "private": true,
   "dependencies": {
     "@nestjs/common": "^10.0.2",
