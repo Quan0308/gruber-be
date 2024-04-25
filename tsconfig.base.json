@@ -15,9 +15,11 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@db/*": ["libs/database/src/*"],
       "@my-workspace/database": ["libs/database/src/index.ts"],
       "@my-workspace/dtos": ["libs/dtos/src/index.ts"],
-      "@my-workspace/libs": ["libs/src/index.ts"]
+      "@my-workspace/libs": ["libs/src/index.ts"],
+      "@my-workspace/middlewares": ["libs/middlewares/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
