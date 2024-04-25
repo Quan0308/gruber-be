@@ -4,7 +4,9 @@
   "license": "MIT",
   "scripts": {
     "build": "nx build",
-    "start": "nx serve gruber-be"
+    "start": "nx serve gruber-be",
+    "typeorm": "typeorm-ts-node-commonjs",
+    "migrate": "npx typeorm-ts-node-commonjs migration:run -d apps/gruber-be/typeorm.config.ts"
   },
   "private": true,
   "dependencies": {

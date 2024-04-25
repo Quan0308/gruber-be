@@ -19,6 +19,22 @@
           "buildTarget": "gruber-be:build:production"
         }
       }
+    },
+    "create-migration": {
+      "executor": "nx:run-commands",
+      "outputs": [],
+      "options": {
+        "command": "typeorm migration:create",
+        "cwd": "apps/gruber-be/src/migrations"
+      }
+    },
+    "migrate": {
+      "executor": "nx:run-commands",
+      "outputs": [],
+      "options": {
+        "command": "typeorm migration:run",
+        "cwd": "apps/gruber-be/src/migrations"
+      }
     }
   }
 }

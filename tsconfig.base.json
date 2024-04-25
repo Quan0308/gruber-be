@@ -17,9 +17,10 @@
     "paths": {
       "@db/*": ["libs/database/src/*"],
       "@my-workspace/database": ["libs/database/src/index.ts"],
-      "@my-workspace/dtos": ["libs/dtos/src/index.ts"],
-      "@my-workspace/libs": ["libs/src/index.ts"],
-      "@my-workspace/middlewares": ["libs/middlewares/src/index.ts"]
+      "@dtos": ["libs/dtos/src/index.ts"],
+      "@libs": ["libs/src/index.ts"],
+      "@middlewares": ["libs/middlewares/src/index.ts"],
+      "@types": ["libs/types/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

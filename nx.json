@@ -36,5 +36,6 @@
       }
     }
   ],
-  "nxCloudAccessToken": "YmU1MWNjNjMtMzFhMi00NjUxLWEwYzItMmYzYjYyY2ZiYzU4fHJlYWQtd3JpdGU="
+  "nxCloudAccessToken": "YmU1MWNjNjMtMzFhMi00NjUxLWEwYzItMmYzYjYyY2ZiYzU4fHJlYWQtd3JpdGU=",
+  "defaultProject": "gruber"
 }

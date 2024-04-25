@@ -2,7 +2,7 @@ import { Module } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 
-import * as dbEntities from '@db/entities';
+import * as dbEntities from './entities';
 
 const entities = (Object.keys(dbEntities) as Array<keyof typeof dbEntities>).map((key => dbEntities[key]));
 @Module({
