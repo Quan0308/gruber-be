@@ -6,13 +6,13 @@ export class Student extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ name: "full_name", type: "nvarchar", length: 255, nullable: false })
+  @Column({ name: "full_name", type: "varchar", length: 255, nullable: false })
   fullName: string;
 
   @Column({ name: "phone", type: "varchar", length: 10, unique: true, nullable: true, default: null })
   phone: string;
 
-  @Column({ name: "avatar", type: "nvarchar", nullable: true, default: null })
+  @Column({ name: "avatar", type: "varchar", nullable: true, default: null })
   avatar: string;
 
   @Column({ name: "role", type: "enum", enum: RoleEnum, nullable: false, default: RoleEnum.USER })

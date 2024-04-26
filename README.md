@@ -12,7 +12,7 @@ comes with a LSP for Vim users.
 
 ## Start the application
 
-Run `npx nx serve gruber-be` to start the development server. Happy coding!
+Run `yarn start` to start the development server. Happy coding!
 
 ## Build for production
 
@@ -54,6 +54,17 @@ Run `npx nx graph` to show the graph of the workspace.
 It will show tasks that you can run with Nx.
 
 - [Learn more about Exploring the Project Graph](https://nx.dev/core-features/explore-graph)
+
+## Create migrations
+-  To create a new migration.
+  ```
+  nx run gruber-be:migrate --name={migration-name}
+  ```
+-  To apply the migrations.
+  ```
+  Unix: bash ./migrate.sh
+  Windows: .\migrate.bat
+  ```
 
 ## Connect with us!
 
