@@ -37,5 +37,12 @@
     }
   ],
   "nxCloudAccessToken": "YmU1MWNjNjMtMzFhMi00NjUxLWEwYzItMmYzYjYyY2ZiYzU4fHJlYWQtd3JpdGU=",
-  "defaultProject": "gruber"
+  "defaultProject": "gruber",
+  "targetDefaults": {
+    "@nx/js:tsc": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
+    }
+  }
 }
