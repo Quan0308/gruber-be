@@ -1,8 +1,9 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm";
 import { RoleEnum } from "@types";
+import { Booking } from "./booking.entity";
 
 @Entity({ name: "users" })
-export class Student extends BaseEntity {
+export class User extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
@@ -32,4 +33,10 @@ export class Student extends BaseEntity {
     precision: null,
   })
   updatedOn: Date;
+
+  @OneToMany(() => Booking, (booking) => booking.driver)
+  bookings: Booking[];
+
+  @OneToMany(() => Booking, (booking) => booking.order)
+  orders: Booking[];
 }

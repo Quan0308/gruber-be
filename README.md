@@ -58,7 +58,7 @@ It will show tasks that you can run with Nx.
 ## Create migrations
 -  To create a new migration.
   ```
-  nx run gruber-be:migrate --name={migration-name}
+  nx run gruber-be:create-migration {migration-name}
   ```
 -  To apply the migrations.
   ```
