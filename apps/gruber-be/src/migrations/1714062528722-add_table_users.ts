@@ -5,9 +5,9 @@ export class AddTableUsers1714062528722 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE users (
         id uuid PRIMARY KEY,
-        full_name varchar(255) NOT NULL,
-        phone varchar(10) UNIQUE,
-        avatar varchar(512),
+        full_name varchar(255) DEFAULT NULL,
+        phone varchar(10) UNIQUE DEFAULT NULL,
+        avatar varchar(512) DEFAULT NULL,
         role varchar NOT NULL DEFAULT 'USER' CHECK (role IN ('ADMIN', 'USER', 'DRIVER')),
         firebase_uid varchar NOT NULL,
         created_on timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,

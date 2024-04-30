@@ -16,6 +16,7 @@ const entities = (Object.keys(dbEntities) as Array<keyof typeof dbEntities>).map
                 password: configService.get('DB_PASSWORD'),
                 database: configService.get('DB_DATABASE'),
                 entities,
+                synchronize: true
             }),
             inject: [ConfigService]
         })

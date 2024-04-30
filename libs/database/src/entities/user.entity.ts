@@ -7,7 +7,7 @@ export class User extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ name: "full_name", type: "varchar", length: 255, nullable: false })
+  @Column({ name: "full_name", type: "varchar", length: 255, nullable: true })
   fullName: string;
 
   @Column({ name: "phone", type: "varchar", length: 10, unique: true, nullable: true, default: null })
