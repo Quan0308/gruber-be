@@ -20,5 +20,7 @@ export class AddTableBookings1714236128365 implements MigrationInterface {
     );
   }
 
-  public async down(queryRunner: QueryRunner): Promise<void> {}
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
 }
