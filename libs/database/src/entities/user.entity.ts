@@ -6,9 +6,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  OneToOne,
+  JoinColumn,
 } from "typeorm";
 import { RoleEnum } from "@types";
 import { Booking } from "./booking.entity";
+import { CardInfo } from "./card_info.entity";
 
 @Entity({ name: "users" })
 export class User extends BaseEntity {
@@ -44,6 +47,10 @@ export class User extends BaseEntity {
 
   @Column({ name: "confirmed", type: "boolean", nullable: false, default: false })
   confirmed: Boolean;
+
+  @OneToOne(() => CardInfo)
+  @JoinColumn({ name: "id", referencedColumnName: "ownerId" })
+  cardInfo: CardInfo;
 
   @OneToMany(() => Booking, (booking) => booking.driver)
   bookings: Booking[];

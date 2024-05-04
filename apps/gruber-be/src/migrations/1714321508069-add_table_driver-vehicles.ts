@@ -15,5 +15,7 @@ export class AddTableDriverVehicles1714321508069 implements MigrationInterface {
             ALTER TABLE driver_vehicles ADD CONSTRAINT fk_owner_id FOREIGN KEY (owner_id) REFERENCES users (id);`);
   }
 
-  public async down(queryRunner: QueryRunner): Promise<void> {}
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
 }

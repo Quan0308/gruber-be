@@ -18,8 +18,6 @@ export class AddTableUsers1714062528722 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`
-      DROP TABLE users
-    `);
+    throw new Error("Method not implemented.");
   }
 }
