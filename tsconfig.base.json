@@ -21,7 +21,8 @@
       "@middlewares": ["libs/middlewares/src/index.ts"],
       "@shared-modules": ["libs/shared-modules/src/index.ts"],
       "@types": ["libs/types/src/index.ts"],
-      "@utils": ["libs/utils/src/index.ts"]
+      "@utils": ["libs/utils/src/index.ts"],
+      "@entities": ["libs/database/src/index.ts"],
     }
   },
   "exclude": ["node_modules", "tmp"]

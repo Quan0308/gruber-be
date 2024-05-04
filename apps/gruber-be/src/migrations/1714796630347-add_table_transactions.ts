@@ -8,7 +8,7 @@ export class AddTableTransactions1714796630347 implements MigrationInterface {
         owner_id UUID NOT NULL,
         amount DECIMAL NOT NULL DEFAULT 0,
         transaction_date TIMESTAMP NOT NULL,
-        status VARCHAR(10) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'success', 'failed')),
+        status VARCHAR(10) NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDIN', 'SUCCESS', 'FAILED')),
         description VARCHAR(255) DEFAULT NULL,
         sender_name VARCHAR(255) DEFAULT NULL,
         receiver_name VARCHAR(255) DEFAULT NULL
