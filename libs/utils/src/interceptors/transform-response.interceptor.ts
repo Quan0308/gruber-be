@@ -10,19 +10,20 @@ interface SuccessResponse<T> {
 
 const transform = <T>(raw?: T): SuccessResponse<T> => {
   const response: SuccessResponse<T> = {
-      statusCode: HttpStatus.OK,
-      message: HttpStatus[HttpStatus.OK],
-      data: null,
+    statusCode: HttpStatus.OK,
+    message: HttpStatus[HttpStatus.OK],
+    data: null,
   };
 
   response.data = raw && isNil((raw as any)["data"]) ? raw : (raw as any)?.data ?? null;
 
   return response;
-}
+};
 
 @Injectable()
 export class TransformResponseInterceptor<T> implements NestInterceptor<T, SuccessResponse<T>> {
   intercept(_context: ExecutionContext, next: CallHandler): Observable<any> {
-    return next.handle().pipe(map(transform));
+    const request = _context.switchToHttp().getRequest();
+    return request.url.includes("auth/confirmation") ? next.handle() : next.handle().pipe(map(transform));
   }
 }

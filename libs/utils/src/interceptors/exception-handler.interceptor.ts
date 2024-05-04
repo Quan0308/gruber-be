@@ -20,14 +20,17 @@ interface ErrorResponse {
 @Injectable()
 export class ExceptionHandlerInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    return next.handle().pipe(
-      catchError((err) =>
-        throwError(() => {
-          this.logError(err);
-          return this.transform(err);
-        })
-      )
-    );
+    const request = context.switchToHttp().getRequest();
+    return request.url.includes("auth/confirmation")
+      ? next.handle()
+      : next.handle().pipe(
+          catchError((err) =>
+            throwError(() => {
+              this.logError(err);
+              return this.transform(err);
+            })
+          )
+        );
   }
 
   logError = (err: any) => {

@@ -1,4 +1,12 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm";
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+} from "typeorm";
 import { RoleEnum } from "@types";
 import { Booking } from "./booking.entity";
 
@@ -33,6 +41,9 @@ export class User extends BaseEntity {
     precision: null,
   })
   updatedOn: Date;
+
+  @Column({ name: "confirmed", type: "boolean", nullable: false, default: false })
+  confirmed: Boolean;
 
   @OneToMany(() => Booking, (booking) => booking.driver)
   bookings: Booking[];

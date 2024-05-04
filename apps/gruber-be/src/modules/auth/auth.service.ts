@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
-import { FirebaseAdminService } from "@shared-modules";
+import { FirebaseAdminService, MailService } from "@shared-modules";
 import { LoginDto } from "@dtos";
 import { IVerifyFirebaseResponse } from "@types";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -9,6 +9,7 @@ import { Repository } from "typeorm";
 export class AuthService {
   constructor(
     private readonly firebaseAdminService: FirebaseAdminService,
+    private readonly mailService: MailService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>
   ) {}
@@ -18,10 +19,10 @@ export class AuthService {
     try {
       const result = await this.firebaseAdminService.createNewUser(data.email, data.password);
       registerResponse = result.data;
-      await this.userRepository.save({ firebaseUid: result.data.localId });
-      return registerResponse;
+      const newUser = await this.userRepository.save({ firebaseUid: result.data.localId });
+      return await this.mailService.sendUserConfirmation(newUser.id, registerResponse.idToken, data.email);
     } catch (ex) {
-      switch (ex.response.error?.message) {
+      switch (ex.response?.error?.message) {
         case "EMAIL_EXISTS":
           return new BadRequestException("Email already exists");
       }
@@ -34,19 +35,41 @@ export class AuthService {
     try {
       const result = await this.firebaseAdminService.verifyUser(data.email, data.password);
       verifyResponse = result.data;
-    } catch (error) {
-      switch (error.response.error.message) {
+      const user = await this.userRepository.findOne({ where: { firebaseUid: verifyResponse.localId } });
+      if (!user.confirmed) {
+        await this.mailService.sendUserConfirmation(user.id, verifyResponse.localId, data.email);
+        return new BadRequestException("Please confirm your email");
+      }
+      return verifyResponse;
+    } catch (ex) {
+      switch (ex.response.error.message) {
         case "EMAIL_NOT_FOUND":
           return new NotFoundException("Email not found");
         case "INVALID_PASSWORD":
           return new BadRequestException("Invalid password");
       }
-      throw new InternalServerErrorException(error.response.error.message);
+      throw new InternalServerErrorException(ex.response.error.message);
     }
-    return verifyResponse;
   }
 
   async verifyFirebaseToken(token: string) {
     return this.firebaseAdminService.verifyToken(token);
+  }
+
+  async verifyEmail(id: string, token: string) {
+    try {
+      const result = await this.firebaseAdminService.verifyToken(token);
+      if (result) {
+        const user = await this.userRepository.findOne({ where: { id } });
+        await this.userRepository.save({
+          ...user,
+          confirmed: true,
+        });
+        return true;
+      }
+      return false;
+    } catch (ex) {
+      return false;
+    }
   }
 }
