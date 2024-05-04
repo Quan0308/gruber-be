@@ -11,7 +11,8 @@ export class AddTableUsers1714062528722 implements MigrationInterface {
         role varchar NOT NULL DEFAULT 'USER' CHECK (role IN ('ADMIN', 'USER', 'DRIVER')),
         firebase_uid varchar NOT NULL,
         created_on timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_on timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+        updated_on timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        confirmed boolean NOT NULL DEFAULT FALSE
       )
     `);
   }
