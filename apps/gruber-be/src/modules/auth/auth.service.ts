@@ -24,7 +24,7 @@ export class AuthService {
     } catch (ex) {
       switch (ex.response?.error?.message) {
         case "EMAIL_EXISTS":
-          return new BadRequestException("Email already exists");
+          throw new BadRequestException("Email already exists");
       }
       throw new InternalServerErrorException(ex.response.error?.message);
     }
@@ -42,11 +42,8 @@ export class AuthService {
       }
       return verifyResponse;
     } catch (ex) {
-      switch (ex.response.error.message) {
-        case "EMAIL_NOT_FOUND":
-          return new NotFoundException("Email not found");
-        case "INVALID_PASSWORD":
-          return new BadRequestException("Invalid password");
+      if (ex.response.error.message === "INVALID_LOGIN_CREDENTIALS") {
+        throw new BadRequestException("Invalid login credentials");
       }
       throw new InternalServerErrorException(ex.response.error.message);
     }
