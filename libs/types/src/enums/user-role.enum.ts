@@ -1,6 +1,6 @@
 export enum RoleEnum {
-  PASSENGER = "PASSENGER",
-  DRIVER = "DRIVER",
-  STAFF = "STAFF",
-  ADMIN = "ADMIN",
+  PASSENGER = "passenger",
+  DRIVER = "driver",
+  STAFF = "staff",
+  ADMIN = "admin",
 }

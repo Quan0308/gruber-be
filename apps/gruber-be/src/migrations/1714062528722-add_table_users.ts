@@ -1,20 +1,64 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner, Table } from "typeorm";
 
 export class AddTableUsers1714062528722 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id uuid PRIMARY KEY,
-        full_name varchar(255) DEFAULT NULL,
-        phone varchar(10) UNIQUE DEFAULT NULL,
-        avatar varchar(512) DEFAULT NULL,
-        role varchar NOT NULL DEFAULT 'PASSENGER' CHECK (role IN ('ADMIN', 'STAFF', 'PASSENGER', 'DRIVER')),
-        firebase_uid varchar NOT NULL,
-        created_on timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_on timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        confirmed boolean NOT NULL DEFAULT FALSE
-      )
-    `);
+    await queryRunner.createTable(
+      new Table({
+        name: "users",
+        columns: [
+          {
+            name: "id",
+            type: "uuid",
+            isPrimary: true,
+          },
+          {
+            name: "full_name",
+            type: "varchar",
+            length: "255",
+            isNullable: true,
+          },
+          {
+            name: "phone",
+            type: "varchar",
+            length: "10",
+            isUnique: true,
+            isNullable: true,
+          },
+          {
+            name: "avatar",
+            type: "varchar",
+            length: "512",
+            isNullable: true,
+          },
+          {
+            name: "role",
+            type: "enum",
+            enum: ["admin", "staff", "passenger", "driver"],
+            default: "'passenger'",
+          },
+          {
+            name: "firebase_uid",
+            type: "varchar",
+            isNullable: false,
+          },
+          {
+            name: "created_on",
+            type: "timestamp",
+            default: "CURRENT_TIMESTAMP",
+          },
+          {
+            name: "updated_on",
+            type: "timestamp",
+            default: "CURRENT_TIMESTAMP",
+          },
+          {
+            name: "confirmed",
+            type: "boolean",
+            default: false,
+          },
+        ],
+      })
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

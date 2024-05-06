@@ -1,14 +1,31 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner, Table } from "typeorm";
 
 export class AddTableLocationRecords1714797509862 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS postgis`);
-    await queryRunner.query(
-      `CREATE TABLE IF NOT EXISTS location_records (
-        id uuid PRIMARY KEY,
-        formatted_address VARCHAR(255) NOT NULL,
-        coordinate geometry NOT NULL
-      )`
+    await queryRunner.createTable(
+      new Table({
+        name: "location_records",
+        columns: [
+          {
+            name: "id",
+            type: "uuid",
+            isPrimary: true,
+          },
+          {
+            name: "formatted_address",
+            type: "varchar",
+            length: "255",
+            isNullable: false,
+            default: "''",
+          },
+          {
+            name: "coordinate",
+            type: "geometry",
+            isNullable: false,
+          },
+        ],
+      })
     );
   }
 

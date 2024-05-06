@@ -1,22 +1,67 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner, Table, TableForeignKey } from "typeorm";
 
 export class AddTableCardsInfo1714795272795 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`
-      CREATE TABLE IF NOT EXISTS cards_info (
-        id UUID PRIMARY KEY,
-        owner_id UUID NOT NULL,
-        bank_name VARCHAR(255) NOT NULL,
-        card_account_number VARCHAR(20) NOT NULL,
-        card_account_name VARCHAR(255) NOT NULL,
-        card_expired_date DATE NOT NULL,
-        card_cvv VARCHAR(3) NOT NULL,
-        phone VARCHAR(10) NOT NULL
-      );
-    `);
-    await queryRunner.query(`
-      ALTER TABLE cards_info ADD CONSTRAINT fk_user_id FOREIGN KEY (owner_id) REFERENCES users (id);
-    `);
+    await queryRunner.createTable(
+      new Table({
+        name: "cards_info",
+        columns: [
+          {
+            name: "id",
+            type: "uuid",
+            isPrimary: true,
+          },
+          {
+            name: "owner_id",
+            type: "uuid",
+            isNullable: false,
+          },
+          {
+            name: "bank_name",
+            type: "varchar",
+            length: "255",
+            isNullable: false,
+          },
+          {
+            name: "card_account_number",
+            type: "varchar",
+            length: "20",
+            isNullable: false,
+            isUnique: true,
+          },
+          {
+            name: "card_account_name",
+            type: "varchar",
+            length: "255",
+            isNullable: false,
+          },
+          {
+            name: "card_expired_date",
+            type: "date",
+            isNullable: false,
+          },
+          {
+            name: "card_cvv",
+            type: "varchar",
+            length: "3",
+            isNullable: false,
+            isUnique: true,
+          },
+          {
+            name: "phone",
+            type: "varchar",
+            length: "10",
+            isNullable: false,
+          },
+        ],
+      })
+    );
+    const foreignKey = new TableForeignKey({
+      columnNames: ["owner_id"],
+      referencedColumnNames: ["id"],
+      referencedTableName: "users",
+    });
+    await queryRunner.createForeignKey("cards_info", foreignKey);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

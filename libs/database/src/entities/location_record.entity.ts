@@ -5,7 +5,7 @@ export class LocationRecord extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ name: "formatted_address", type: "varchar", length: 255, nullable: false })
+  @Column({ name: "formatted_address", type: "varchar", length: 255, nullable: false, default: "" })
   formattedAddress: string;
 
   @Column({ name: "coordinate", type: "geometry", nullable: false })

@@ -13,10 +13,8 @@ export class BookingRoute extends BaseEntity {
   destinationId: string;
 
   @ManyToOne(() => LocationRecord)
-  @JoinColumn({ name: "pickup_location_id", referencedColumnName: "id" })
   pickupLocation: LocationRecord;
 
   @ManyToOne(() => LocationRecord)
-  @JoinColumn({ name: "destination_id", referencedColumnName: "id" })
   destination: LocationRecord;
 }
