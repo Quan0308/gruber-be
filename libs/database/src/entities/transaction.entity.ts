@@ -1,4 +1,4 @@
-import { TransactionStatus } from "@types";
+import { TransactionStatus, TransactionType } from "@types";
 import { BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Wallet } from "./wallet.entity";
 
@@ -21,6 +21,9 @@ export class Transaction extends BaseEntity {
   })
   transactionDate: Date;
 
+  @Column({ name: "type", type: "enum", enum: TransactionType, nullable: false, default: TransactionType.DEPOSIT })
+  type: TransactionType;
+
   @Column({
     name: "status",
     type: "enum",
@@ -32,12 +35,6 @@ export class Transaction extends BaseEntity {
 
   @Column({ name: "description", type: "varchar", length: 255, nullable: true, default: null })
   description: string;
-
-  @Column({ name: "sender_name", type: "varchar", length: 255, nullable: true, default: null })
-  senderName: string;
-
-  @Column({ name: "receiver_name", type: "varchar", length: 255, nullable: true, default: null })
-  receiverName: string;
 
   @ManyToOne(() => Wallet, (wallet) => wallet.transaction)
   wallet: Wallet;
