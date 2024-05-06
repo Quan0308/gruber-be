@@ -86,8 +86,8 @@ export class AddTableBookings1714827900131 implements MigrationInterface {
             name: "payment_method",
             type: "enum",
             enum: ["card", "cash"],
-            isNullable: false,
-            default: "'card'",
+            isNullable: true,
+            default: "null",
           },
           {
             name: "vehicle_type",
@@ -99,7 +99,8 @@ export class AddTableBookings1714827900131 implements MigrationInterface {
           {
             name: "transaction_id",
             type: "uuid",
-            isNullable: false,
+            isNullable: true,
+            default: null,
           },
           {
             name: "status",

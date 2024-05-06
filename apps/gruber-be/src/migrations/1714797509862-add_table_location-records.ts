@@ -16,8 +16,13 @@ export class AddTableLocationRecords1714797509862 implements MigrationInterface 
             name: "formatted_address",
             type: "varchar",
             length: "255",
-            isNullable: false,
-            default: "''",
+            isNullable: true,
+          },
+          {
+            name: "name",
+            type: "varchar",
+            length: "255",
+            isNullable: true,
           },
           {
             name: "coordinate",

@@ -17,12 +17,12 @@
     "paths": {
       "@db/*": ["libs/database/src/*"],
       "@dtos": ["libs/dtos/src/index.ts"],
+      "@entities": ["libs/database/src/index.ts"],
       "@libs": ["libs/src/index.ts"],
       "@middlewares": ["libs/middlewares/src/index.ts"],
       "@shared-modules": ["libs/shared-modules/src/index.ts"],
       "@types": ["libs/types/src/index.ts"],
-      "@utils": ["libs/utils/src/index.ts"],
-      "@entities": ["libs/database/src/index.ts"],
+      "@utils": ["libs/utils/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
