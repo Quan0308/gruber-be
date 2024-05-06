@@ -36,6 +36,13 @@ export class AddTableTransactions1714796630347 implements MigrationInterface {
             default: "'pending'",
           },
           {
+            name: "type",
+            type: "enum",
+            enum: ["deposit", "withdraw"],
+            isNullable: false,
+            default: "'deposit'",
+          },
+          {
             name: "description",
             type: "varchar",
             length: "255",
