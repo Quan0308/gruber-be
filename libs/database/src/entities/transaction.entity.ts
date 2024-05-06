@@ -1,5 +1,6 @@
 import { TransactionStatus } from "@types";
-import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Wallet } from "./wallet.entity";
 
 @Entity({ name: "transactions" })
 export class Transaction extends BaseEntity {
@@ -20,7 +21,13 @@ export class Transaction extends BaseEntity {
   })
   transactionDate: Date;
 
-  @Column({ name: "status", type: "enum", length: 10, nullable: false, default: "pending" })
+  @Column({
+    name: "status",
+    type: "enum",
+    enum: TransactionStatus,
+    nullable: false,
+    default: TransactionStatus.PENDING,
+  })
   status: TransactionStatus;
 
   @Column({ name: "description", type: "varchar", length: 255, nullable: true, default: null })
@@ -31,4 +38,7 @@ export class Transaction extends BaseEntity {
 
   @Column({ name: "receiver_name", type: "varchar", length: 255, nullable: true, default: null })
   receiverName: string;
+
+  @ManyToOne(() => Wallet, (wallet) => wallet.transaction)
+  wallet: Wallet;
 }

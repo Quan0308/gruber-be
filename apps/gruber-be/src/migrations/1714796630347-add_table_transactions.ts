@@ -1,23 +1,56 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner, Table, TableForeignKey } from "typeorm";
 
 export class AddTableTransactions1714796630347 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `CREATE TABLE IF NOT EXISTS transactions (
-        id UUID PRIMARY KEY,
-        owner_id UUID NOT NULL,
-        amount DECIMAL NOT NULL DEFAULT 0,
-        transaction_date TIMESTAMP NOT NULL,
-        status VARCHAR(10) NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDIN', 'SUCCESS', 'FAILED')),
-        description VARCHAR(255) DEFAULT NULL,
-        sender_name VARCHAR(255) DEFAULT NULL,
-        receiver_name VARCHAR(255) DEFAULT NULL
-      )`
+    await queryRunner.createTable(
+      new Table({
+        name: "transactions",
+        columns: [
+          {
+            name: "id",
+            type: "uuid",
+            isPrimary: true,
+          },
+          {
+            name: "owner_id",
+            type: "uuid",
+            isNullable: false,
+          },
+          {
+            name: "amount",
+            type: "decimal",
+            isNullable: false,
+            default: 0,
+          },
+          {
+            name: "transaction_date",
+            type: "timestamp",
+            default: "CURRENT_TIMESTAMP",
+            isNullable: false,
+          },
+          {
+            name: "status",
+            type: "enum",
+            enum: ["pending", "success", "failed"],
+            isNullable: false,
+            default: "'pending'",
+          },
+          {
+            name: "description",
+            type: "varchar",
+            length: "255",
+            isNullable: true,
+            default: null,
+          },
+        ],
+      })
     );
-
-    await queryRunner.query(
-      `ALTER TABLE transactions ADD CONSTRAINT fk_user_id FOREIGN KEY (owner_id) REFERENCES users (id)`
-    );
+    const foreignKey = new TableForeignKey({
+      columnNames: ["owner_id"],
+      referencedColumnNames: ["id"],
+      referencedTableName: "users",
+    });
+    await queryRunner.createForeignKey("transactions", foreignKey);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

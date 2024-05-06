@@ -7,7 +7,6 @@ import {
   UpdateDateColumn,
   OneToMany,
   OneToOne,
-  JoinColumn,
 } from "typeorm";
 import { RoleEnum } from "@types";
 import { Booking } from "./booking.entity";
@@ -27,7 +26,7 @@ export class User extends BaseEntity {
   @Column({ name: "avatar", type: "varchar", nullable: true, default: null })
   avatar: string;
 
-  @Column({ name: "role", type: "enum", enum: RoleEnum, nullable: false, default: RoleEnum.USER })
+  @Column({ name: "role", type: "enum", enum: RoleEnum, default: RoleEnum.PASSENGER })
   role: RoleEnum;
 
   @Column({ name: "firebase_uid", nullable: false })
@@ -49,7 +48,6 @@ export class User extends BaseEntity {
   confirmed: Boolean;
 
   @OneToOne(() => CardInfo)
-  @JoinColumn({ name: "id", referencedColumnName: "ownerId" })
   cardInfo: CardInfo;
 
   @OneToMany(() => Booking, (booking) => booking.driver)

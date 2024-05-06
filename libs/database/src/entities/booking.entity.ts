@@ -6,11 +6,11 @@ import {
   BaseEntity,
   CreateDateColumn,
   ManyToOne,
-  JoinColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { User, Transaction } from "@entities";
 
+import { User } from "./user.entity";
+import { Transaction } from "./transaction.entity";
 @Entity({ name: "bookings" })
 export class Booking extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
@@ -74,22 +74,17 @@ export class Booking extends BaseEntity {
   status: BookingStatus;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: "driver_id", referencedColumnName: "id" })
   driver: User;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: "ordered_by_id", referencedColumnName: "id" })
   order: User;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: "created_by", referencedColumnName: "id" })
   createdByUser: User;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: "updated_by", referencedColumnName: "id" })
   updatedByUser: User;
 
   @ManyToOne(() => Transaction)
-  @JoinColumn({ name: "transaction_id", referencedColumnName: "id" })
   transaction: Transaction;
 }

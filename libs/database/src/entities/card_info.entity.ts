@@ -1,4 +1,5 @@
-import { BaseEntity, Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "./user.entity";
 
 @Entity({ name: "cards_info" })
 export class CardInfo extends BaseEntity {
@@ -25,4 +26,8 @@ export class CardInfo extends BaseEntity {
 
   @Column({ name: "phone", type: "varchar", length: 10, nullable: false })
   phone: string;
+
+  @OneToOne(() => User)
+  @JoinColumn({ name: "owner_id", referencedColumnName: "id" })
+  owner: User;
 }
