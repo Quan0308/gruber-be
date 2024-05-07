@@ -4,8 +4,7 @@ import { Injectable, InternalServerErrorException, NotFoundException } from "@ne
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { BookingRouteService } from "../booking_route/booking-route.service";
-import { PaymentMethod, RoleEnum } from "@types";
-import { validate } from "class-validator";
+import { BookingStatus, PaymentMethod, RoleEnum } from "@types";
 import { plainToClass } from "class-transformer";
 
 @Injectable()
@@ -51,6 +50,7 @@ export class BookingService {
       throw new InternalServerErrorException();
     }
   }
+
   async createBookingByStaff(data: CreateBookingByStaffDto) {
     try {
       const { user_id, driver_id, booking_route, name, phone, vehicle_type } = data;
@@ -76,6 +76,34 @@ export class BookingService {
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException();
+    }
+  }
+
+  async updateBookingStatus(bookingId: string, status: BookingStatus, driverId: string) {
+    try {
+      const booking = await this.bookingRepository.findOne({ where: { id: bookingId } });
+      if (!booking) {
+        throw new NotFoundException("Booking not found");
+      }
+      switch (status) {
+        case BookingStatus.CANCELLED:
+          if (booking.status !== BookingStatus.PENDING) throw new Error("Cannot cancel booking that is not pending");
+          booking.completedOn = new Date(new Date().toISOString());
+          break;
+        case BookingStatus.PICKED_UP:
+          booking.startedOn = new Date(new Date().toISOString());
+          break;
+        case BookingStatus.COMPLETED:
+          booking.completedOn = new Date(new Date().toISOString());
+          break;
+        default:
+          break;
+      }
+      booking.status = status;
+      booking.updatedBy = driverId;
+      return await this.bookingRepository.save(booking);
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
     }
   }
 }

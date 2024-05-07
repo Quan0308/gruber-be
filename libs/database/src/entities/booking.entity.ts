@@ -1,4 +1,4 @@
-import { BookingStatus, PaymentMethod } from "@types";
+import { BookingStatus, PaymentMethod, RoleEnum } from "@types";
 import {
   Entity,
   Column,
@@ -7,6 +7,7 @@ import {
   CreateDateColumn,
   ManyToOne,
   UpdateDateColumn,
+  BeforeUpdate,
 } from "typeorm";
 
 import { User } from "./user.entity";
@@ -90,4 +91,12 @@ export class Booking extends BaseEntity {
 
   @ManyToOne(() => Transaction)
   transaction: Transaction;
+
+  @BeforeUpdate()
+  async checkDriverRole() {
+    const driver = await User.findOne({ where: { id: this.driverId } });
+    if (!driver || driver.role !== RoleEnum.DRIVER) {
+      throw new Error("Driver not found");
+    }
+  }
 }

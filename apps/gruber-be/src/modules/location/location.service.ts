@@ -2,8 +2,7 @@ import { LocationRecord } from "@db/entities";
 import { CreateLocationDto } from "@dtos";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { Point } from "typeorm";
+import { Repository, Point } from "typeorm";
 
 @Injectable()
 export class LocationService {
@@ -41,12 +40,11 @@ export class LocationService {
       .getOne(); //coordinates is ordered as [long, lat]
   }
 
-  async getLocationByHint(hint: string, limit: number = 10, offset: number = 0) {
-    console.log(hint);
+  async getLocationByKeyWord(keyword: string, limit: number = 10, offset: number = 0) {
     return await this.locationRecordRepository
       .createQueryBuilder("location")
-      .where("location.name LIKE :search", { search: `%${hint}%` })
-      .orWhere("location.formattedAddress LIKE :search", { search: `%${hint}%` })
+      .where("LOWER(location.name) ILIKE :search", { search: `%${keyword}%` })
+      .orWhere("LOWER(location.formattedAddress) ILIKE :search", { search: `%${keyword}%` })
       .skip(offset)
       .take(limit)
       .getMany();

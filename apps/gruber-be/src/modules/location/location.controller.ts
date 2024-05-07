@@ -19,12 +19,11 @@ export class LocationController {
 
   @Get("search")
   async getLocationByHint(
-    @Query("keyword") keyword: string,
+    @Query("key") keyword: string,
     @Query("limit") limit: number,
     @Query("offset") offset: number
   ) {
-    console.log(keyword);
-    return await this.locationService.getLocationByHint(keyword, limit, offset);
+    return await this.locationService.getLocationByKeyWord(decodeURI(keyword).trim().toLowerCase(), limit, offset);
   }
 
   @Get("nearby")

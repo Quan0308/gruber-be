@@ -1,8 +1,9 @@
-import { Body, Controller, HttpCode, Post, UseGuards, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, HttpCode, Param, Patch, Post } from "@nestjs/common";
 import { BookingService } from "./booking.service";
 import { CreateBookingByPassengerDto, CreateBookingByStaffDto } from "@dtos";
 import { AuthGuard } from "@nestjs/passport";
 import { CreateBookingValidationPipe } from "@utils";
+import { BookingStatus } from "@types";
 
 @Controller("bookings")
 export class BookingController {
@@ -15,5 +16,15 @@ export class BookingController {
     @Body(new CreateBookingValidationPipe()) data: CreateBookingByPassengerDto | CreateBookingByStaffDto
   ) {
     return await this.bookingService.createBooking(data);
+  }
+
+  @Patch(":id/status")
+  @HttpCode(200)
+  async updateBookingStatus(
+    @Param("id") id: string,
+    @Body("status") status: BookingStatus,
+    @Body("driver_id") driver_id: string
+  ) {
+    return await this.bookingService.updateBookingStatus(id, status, driver_id);
   }
 }
