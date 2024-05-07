@@ -17,25 +17,28 @@ export class LocationService {
       type: "Point",
       coordinates: [data.lng, data.lat],
     };
-    const newEntity = this.locationRecordRepository.create({
-      formattedAddress: data?.formattedAddress,
-      name: data?.name,
-      coordinate: pointObject,
-    });
-    return await this.locationRecordRepository.save(newEntity);
+    const existedLocationCoordinate = await this.getLocationByUnit(data.lng, data.lat, 0.00001);
+    return existedLocationCoordinate
+      ? existedLocationCoordinate
+      : await this.locationRecordRepository.save({
+          formattedAddress: data?.formattedAddress,
+          name: data?.name,
+          coordinate: pointObject,
+        });
   }
 
-  async getLocationNearby(lng: number, lat: number) {
+  async getLocationByUnit(lng: number, lat: number, unit: number) {
     const location: Point = {
       type: "Point",
       coordinates: [lng, lat],
     };
     return this.locationRecordRepository
       .createQueryBuilder("location")
-      .where("ST_DWithin(location.coordinate, ST_GeomFromGeoJSON(:location), 1000)", {
+      .where("ST_DWithin(location.coordinate, ST_GeomFromGeoJSON(:location), :unit)", {
         location: JSON.stringify(location),
+        unit,
       })
-      .getMany(); //coordinates is ordered as [long, lat]
+      .getOne(); //coordinates is ordered as [long, lat]
   }
 
   async getLocationByHint(hint: string, limit: number = 10, offset: number = 0) {
