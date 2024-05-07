@@ -1,14 +1,10 @@
-import { IsDecimal, IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty } from "class-validator";
+import { CreateLocationDto } from "../location";
 
 export class CreateRouteDto {
-  @IsString()
-  formattedAddress: string;
+  @IsNotEmpty()
+  from: CreateLocationDto;
 
   @IsNotEmpty()
-  @IsDecimal()
-  lat: number;
-
-  @IsNotEmpty()
-  @IsDecimal()
-  long: number;
+  to: CreateLocationDto;
 }

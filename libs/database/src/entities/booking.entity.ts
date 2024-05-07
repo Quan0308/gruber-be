@@ -25,6 +25,9 @@ export class Booking extends BaseEntity {
   @Column({ name: "ordered_by_id", type: "uuid", nullable: false })
   ordered_by_Id: string;
 
+  @Column({ name: "name", type: "varchar", length: 255, nullable: true, default: null })
+  name: string;
+
   @Column({ name: "phone", type: "varchar", length: 10, nullable: true, default: null })
   phone: string;
 

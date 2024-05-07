@@ -40,7 +40,10 @@ export class AuthService {
         await this.mailService.sendUserConfirmation(user.id, verifyResponse.localId, data.email);
         return new BadRequestException("Please confirm your email");
       }
-      return verifyResponse;
+      return {
+        ...verifyResponse,
+        ...user,
+      };
     } catch (ex) {
       switch (ex.response.error.message) {
         case "EMAIL_NOT_FOUND":
