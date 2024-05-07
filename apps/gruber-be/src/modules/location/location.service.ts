@@ -15,7 +15,7 @@ export class LocationService {
   async createLocation(data: CreateLocationDto) {
     const pointObject: Point = {
       type: "Point",
-      coordinates: [data.long, data.lat],
+      coordinates: [data.lng, data.lat],
     };
     const newEntity = this.locationRecordRepository.create({
       formattedAddress: data?.formattedAddress,
@@ -25,10 +25,10 @@ export class LocationService {
     return await this.locationRecordRepository.save(newEntity);
   }
 
-  async getLocationNearby(long: number, lat: number) {
+  async getLocationNearby(lng: number, lat: number) {
     const location: Point = {
       type: "Point",
-      coordinates: [long, lat],
+      coordinates: [lng, lat],
     };
     return this.locationRecordRepository
       .createQueryBuilder("location")

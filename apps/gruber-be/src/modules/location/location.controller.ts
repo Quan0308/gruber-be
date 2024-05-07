@@ -28,7 +28,7 @@ export class LocationController {
   }
 
   @Get("nearby")
-  async getLocationNearby(@Query("long") long: number, @Query("lat") lat: number) {
-    return await this.locationService.getLocationNearby(long, lat);
+  async getLocationNearby(@Query("long") lng: number, @Query("lat") lat: number) {
+    return await this.locationService.getLocationNearby(lng, lat);
   }
 }

@@ -1,9 +1,11 @@
-import { IsDecimal, IsNotEmpty, IsString } from "class-validator";
+import { IsDecimal, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export class CreateLocationDto {
+  @IsNotEmpty()
   @IsString()
-  formattedAddress?: string;
+  formattedAddress: string;
 
+  @IsOptional()
   @IsString()
   name?: string;
 
@@ -13,5 +15,5 @@ export class CreateLocationDto {
 
   @IsNotEmpty()
   @IsDecimal()
-  long: number;
+  lng: number;
 }

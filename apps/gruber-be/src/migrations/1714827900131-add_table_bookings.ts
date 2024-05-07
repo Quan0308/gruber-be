@@ -27,10 +27,18 @@ export class AddTableBookings1714827900131 implements MigrationInterface {
             isNullable: false,
           },
           {
+            name: "name",
+            type: "varchar",
+            length: "255",
+            isNullable: true,
+            default: null,
+          },
+          {
             name: "phone",
             type: "varchar",
             length: "10",
             isNullable: true,
+            default: null,
           },
           {
             name: "created_on",
