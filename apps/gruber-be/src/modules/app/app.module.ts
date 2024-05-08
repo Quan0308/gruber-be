@@ -6,6 +6,7 @@ import { DatabaseModule } from "@db/database.module";
 import { AuthModule } from "../auth/auth.module";
 import { LocationModule } from "../location/location.module";
 import { BookingModule } from "../booking/booking.module";
+import { UserModule } from "../user/user.module";
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { BookingModule } from "../booking/booking.module";
     LocationModule,
     BookingModule,
     LocationModule,
+    UserModule,
   ],
   controllers: [AppController],
 })

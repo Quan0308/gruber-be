@@ -1,4 +1,4 @@
-import { Booking, User } from "@db/entities";
+import { Booking } from "@db/entities";
 import { CreateBookingByPassengerDto, CreateBookingByStaffDto } from "@dtos";
 import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -6,20 +6,20 @@ import { Repository } from "typeorm";
 import { BookingRouteService } from "../booking_route/booking-route.service";
 import { BookingStatus, PaymentMethod, RoleEnum } from "@types";
 import { plainToClass } from "class-transformer";
+import { UserService } from "../user/user.service";
 
 @Injectable()
 export class BookingService {
   constructor(
     @InjectRepository(Booking)
     private bookingRepository: Repository<Booking>,
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
+    private readonly userService: UserService,
     private readonly bookingRouteService: BookingRouteService
   ) {}
 
   async createBooking(data: CreateBookingByPassengerDto | CreateBookingByStaffDto) {
     const { user_id } = data;
-    const user = await this.userRepository.findOne({ where: { id: user_id } });
+    const user = await this.userService.getUserById(user_id);
     if (!user) {
       throw new NotFoundException("User not found");
     }
@@ -54,7 +54,7 @@ export class BookingService {
   async createBookingByStaff(data: CreateBookingByStaffDto) {
     try {
       const { user_id, driver_id, booking_route, name, phone, vehicle_type } = data;
-      const driver = await this.userRepository.findOne({ where: { id: driver_id } });
+      const driver = await this.userService.getUserById(driver_id);
       if (!driver || driver.role !== RoleEnum.DRIVER) {
         throw new NotFoundException("Driver not found");
       }
@@ -102,6 +102,22 @@ export class BookingService {
       booking.status = status;
       booking.updatedBy = updatedById;
       return await this.bookingRepository.save(booking);
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+
+  async getCurrentBookingByUserId(userId: string) {
+    try {
+      const user = await this.userService.getUserById(userId);
+      if (!user) {
+        throw new NotFoundException("User not found");
+      }
+      const booking =
+        user.role === RoleEnum.DRIVER
+          ? await this.bookingRepository.findOne({ where: { driverId: userId }, order: { createdOn: "DESC" } })
+          : await this.bookingRepository.findOne({ where: { ordered_by_Id: userId }, order: { createdOn: "DESC" } });
+      return booking?.status !== BookingStatus.COMPLETED ? booking : null;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
