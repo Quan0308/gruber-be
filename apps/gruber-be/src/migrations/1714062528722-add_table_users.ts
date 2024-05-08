@@ -51,11 +51,6 @@ export class AddTableUsers1714062528722 implements MigrationInterface {
             type: "timestamp",
             default: "CURRENT_TIMESTAMP",
           },
-          {
-            name: "confirmed",
-            type: "boolean",
-            default: false,
-          },
         ],
       })
     );

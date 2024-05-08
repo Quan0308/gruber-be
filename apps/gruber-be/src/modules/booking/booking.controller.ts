@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, Param, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Param, Patch, Post } from "@nestjs/common";
 import { BookingService } from "./booking.service";
 import { CreateBookingByPassengerDto, CreateBookingByStaffDto } from "@dtos";
 import { AuthGuard } from "@nestjs/passport";
@@ -8,6 +8,11 @@ import { BookingStatus } from "@types";
 @Controller("bookings")
 export class BookingController {
   constructor(private readonly bookingService: BookingService) {}
+
+  @Get()
+  async getAllBookings() {
+    return await this.bookingService.getAllBookings();
+  }
 
   //@UseGuards(AuthGuard("firebase"))
   @Post()

@@ -2,7 +2,7 @@ import { Booking } from "@db/entities";
 import { CreateBookingByPassengerDto, CreateBookingByStaffDto } from "@dtos";
 import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Not, Repository } from "typeorm";
 import { BookingRouteService } from "../booking_route/booking-route.service";
 import { BookingStatus, PaymentMethod, RoleEnum } from "@types";
 import { plainToClass } from "class-transformer";
@@ -79,13 +79,14 @@ export class BookingService {
     }
   }
 
-  async updateBookingStatus(bookingId: string, status: BookingStatus, updatedById: string) {
+  async updateBookingStatus(bookingId: string, targetStatus: BookingStatus, updatedById: string) {
     try {
       const booking = await this.bookingRepository.findOne({ where: { id: bookingId } });
-      if (!booking) {
-        throw new NotFoundException("Booking not found");
+      const user = await this.userService.getUserById(updatedById);
+      if (!booking || !user) {
+        throw new NotFoundException("Booking or user not found");
       }
-      switch (status) {
+      switch (targetStatus) {
         case BookingStatus.CANCELLED:
           if (booking.status !== BookingStatus.PENDING) throw new Error("Cannot cancel booking that is not pending");
           booking.completedOn = new Date(new Date().toISOString());
@@ -99,7 +100,7 @@ export class BookingService {
         default:
           break;
       }
-      booking.status = status;
+      booking.status = targetStatus;
       booking.updatedBy = updatedById;
       return await this.bookingRepository.save(booking);
     } catch (error) {
@@ -118,6 +119,17 @@ export class BookingService {
           ? await this.bookingRepository.findOne({ where: { driverId: userId }, order: { createdOn: "DESC" } })
           : await this.bookingRepository.findOne({ where: { ordered_by_Id: userId }, order: { createdOn: "DESC" } });
       return booking?.status !== BookingStatus.COMPLETED ? booking : null;
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+
+  async getAllBookings() {
+    try {
+      return await this.bookingRepository.find({
+        where: { status: Not(BookingStatus.COMPLETED) },
+        order: { createdOn: "DESC" },
+      });
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }

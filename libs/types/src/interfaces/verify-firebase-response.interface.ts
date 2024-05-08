@@ -1,8 +1,7 @@
 export interface IVerifyFirebaseResponse {
-    email: string;
-    expiresIn: string;
-    idToken: string;
-    localId: string;
-    refreshToken: string;
-    registered: boolean;
+  uid: string;
+  email: string;
+  expiresIn: string;
+  disabled: boolean;
+  token: string;
 }

@@ -18,19 +18,22 @@ export class MailService {
     });
   }
 
-  async sendUserConfirmation(id: string, token: string, email: string) {
+  async sendUserConfirmation(email: string, displayName: string, url: string) {
     try {
-      const url = `http://localhost:3001/api/auth/confirmation?id=${id}&token=${token}`;
       const transporter = this.mailTransport();
-      const from: Address = {
-        name: "No Reply",
-        address: "bddquan@gmail.com",
-      };
       const options: MailOptions = {
-        from,
+        from: "noreply@gruber-10230.firebaseapp.com",
+        replyTo: "noreply",
         to: email,
-        subject: "Welcome to Gruber! Confirm your email",
-        html: `<p>Please confirm your email by clicking this link: <a href="${url}">Link</a></p>`,
+        subject: `Verify your email for ${this.configService.get("APP_NAME")}`,
+        html: `
+        <p>Hello ${displayName || email},</p>
+        <p>Follow this link to verify your email address.</p>
+        <p><a href="${url}">Link</a></p>
+        <p>If you didn’t ask to verify this address, you can ignore this email.</p>
+        <p>Thanks,</p>
+        <p>Your ${this.configService.get("APP_NAME")} team</p>
+      `,
       };
 
       await transporter.sendMail(options);

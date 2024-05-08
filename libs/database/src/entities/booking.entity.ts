@@ -8,6 +8,7 @@ import {
   ManyToOne,
   UpdateDateColumn,
   BeforeUpdate,
+  JoinColumn,
 } from "typeorm";
 
 import { User } from "./user.entity";
