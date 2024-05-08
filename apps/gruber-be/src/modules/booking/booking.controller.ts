@@ -23,8 +23,8 @@ export class BookingController {
   async updateBookingStatus(
     @Param("id") id: string,
     @Body("status") status: BookingStatus,
-    @Body("driver_id") driver_id: string
+    @Body("updated_by_id") updatedById: string
   ) {
-    return await this.bookingService.updateBookingStatus(id, status, driver_id);
+    return await this.bookingService.updateBookingStatus(id, status, updatedById);
   }
 }

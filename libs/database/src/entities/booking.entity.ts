@@ -94,6 +94,7 @@ export class Booking extends BaseEntity {
 
   @BeforeUpdate()
   async checkDriverRole() {
+    if (!this.driverId) return;
     const driver = await User.findOne({ where: { id: this.driverId } });
     if (!driver || driver.role !== RoleEnum.DRIVER) {
       throw new Error("Driver not found");

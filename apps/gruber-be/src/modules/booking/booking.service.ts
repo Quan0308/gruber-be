@@ -79,7 +79,7 @@ export class BookingService {
     }
   }
 
-  async updateBookingStatus(bookingId: string, status: BookingStatus, driverId: string) {
+  async updateBookingStatus(bookingId: string, status: BookingStatus, updatedById: string) {
     try {
       const booking = await this.bookingRepository.findOne({ where: { id: bookingId } });
       if (!booking) {
@@ -100,7 +100,7 @@ export class BookingService {
           break;
       }
       booking.status = status;
-      booking.updatedBy = driverId;
+      booking.updatedBy = updatedById;
       return await this.bookingRepository.save(booking);
     } catch (error) {
       throw new InternalServerErrorException(error.message);
