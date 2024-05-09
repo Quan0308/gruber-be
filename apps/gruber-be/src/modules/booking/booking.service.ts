@@ -11,6 +11,7 @@ import {
   ICurrentBookingUser,
   PaymentMethod,
   RoleEnum,
+  VehicleTypePrice,
 } from "@types";
 import { plainToClass } from "class-transformer";
 import { UserService } from "../user/user.service";
@@ -201,6 +202,16 @@ export class BookingService {
       payment_method: booking.paymentMethod,
       vehicle_type: booking?.vehicleType,
       price: booking.price,
+    };
+  }
+
+  getPriceByDistance(distance: number) {
+    //distance in meters
+    return {
+      motorbike:
+        VehicleTypePrice.MOTORBIKE.FIRST_2_KM + ((distance - 2000) / 1000) * VehicleTypePrice.MOTORBIKE.NEXT_PER_KM,
+      car4: VehicleTypePrice.CAR4.FIRST_2_KM + ((distance - 2000) / 1000) * VehicleTypePrice.CAR4.NEXT_PER_KM,
+      car7: VehicleTypePrice.CAR7.FIRST_2_KM + ((distance - 2000) / 1000) * VehicleTypePrice.CAR7.NEXT_PER_KM,
     };
   }
 }
