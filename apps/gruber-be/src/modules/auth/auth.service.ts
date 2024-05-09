@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { FirebaseAdminService, MailService } from "@shared-modules";
 import { LoginDto, RegisterDto } from "@dtos";
-import { IVerifyFirebaseResponse } from "@types";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "@db/entities";
 import { Repository } from "typeorm";
@@ -21,7 +20,7 @@ export class AuthService {
         data.password,
         data.role
       );
-      await this.userRepository.save({ firebaseUid: userRecord.uid });
+      await this.userRepository.save({ firebaseUid: userRecord.uid, role: data.role });
       return await this.mailService.sendUserConfirmation(data.email, data.email, emailVerificationLink);
     } catch (ex) {
       switch (ex.response?.error?.message) {
@@ -33,7 +32,6 @@ export class AuthService {
   }
 
   async verifyUser(data: LoginDto) {
-    let verifyResponse: IVerifyFirebaseResponse;
     try {
       const user = await this.firebaseAdminService.verifyUser(data.email, data.password);
       const isVerifiedEmail = await this.firebaseAdminService.checkVerifiedEmail(user.data.localId);
@@ -42,8 +40,8 @@ export class AuthService {
         await this.mailService.sendUserConfirmation(data.email, user.data.displayName, emailVerificationLink);
         return new BadRequestException("Please confirm your email");
       }
-      verifyResponse = user.data;
-      return verifyResponse;
+      const userEntity = await this.userRepository.findOne({ where: { firebaseUid: user.data.localId } });
+      return { id: userEntity.id, ...user.data };
     } catch (ex) {
       switch (ex.response.error.message) {
         case "EMAIL_NOT_FOUND":

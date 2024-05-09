@@ -79,6 +79,7 @@ export class Booking extends BaseEntity {
   status: BookingStatus;
 
   @ManyToOne(() => User)
+  @JoinColumn({ name: "driver_id" })
   driver: User;
 
   @ManyToOne(() => User)

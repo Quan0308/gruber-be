@@ -1,6 +1,8 @@
 export interface ILocation {
-  formattedAddress?: string;
-  name?: string;
-  lat: number;
-  long: number;
+  formatted_address: string;
+  name: string;
+  location: {
+    lat: number;
+    lng: number;
+  };
 }
