@@ -1,7 +1,8 @@
 import { ActivityStatus } from "@types";
-import { BaseEntity, Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { DriverVehicle } from "./driver-vehicle.entity";
 import { Wallet } from "./wallet.entity";
+import { User } from "./user.entity";
 
 @Entity({ name: "drivers_info" })
 export class DriverInfor extends BaseEntity {
@@ -42,4 +43,8 @@ export class DriverInfor extends BaseEntity {
 
   @OneToOne(() => Wallet)
   cashWallet: Wallet;
+
+  @OneToOne(() => User)
+  @JoinColumn({ name: "driver_id", referencedColumnName: "id" })
+  user: User;
 }

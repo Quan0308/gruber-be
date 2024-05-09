@@ -22,4 +22,9 @@ export class UserController {
   async updateUserGeneralInfo(@Param("id") id: string, @Body() data: UpdateUserGeneralInfoDto) {
     return await this.userService.updateUserGeneralInfo(id, data);
   }
+
+  @Patch(":id/validate")
+  async validateDriver(@Param("id") id: string) {
+    return await this.userService.validateDriver(id);
+  }
 }
