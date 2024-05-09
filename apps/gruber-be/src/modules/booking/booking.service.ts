@@ -45,10 +45,13 @@ export class BookingService {
         from: booking_route.pick_up,
         to: booking_route.destination,
       });
+      const distance = await this.bookingRouteService.getDistanceOfRoute(route.pickupLocationId, route.destinationId);
+      const price = this.getPriceByDistance(distance * 1000);
       return await this.bookingRepository.save({
         ordered_by_Id: user_id,
         name,
         phone,
+        price: price[vehicle_type],
         bookingRouteId: route.id,
         vehicleType: vehicle_type,
         paymentMethod: payment_method,
@@ -72,11 +75,14 @@ export class BookingService {
         booking_route.pick_up,
         booking_route.destination
       );
+      const distance = await this.bookingRouteService.getDistanceOfRoute(route.pickupLocationId, route.destinationId);
+      const price = this.getPriceByDistance(distance * 1000);
       return await this.bookingRepository.save({
         ordered_by_Id: user_id,
         driverId: driver_id,
         name,
         phone,
+        price: price[vehicle_type],
         bookingRouteId: route.id,
         vehicleType: vehicle_type,
         createdBy: user_id,
@@ -99,19 +105,21 @@ export class BookingService {
       switch (targetStatus) {
         case BookingStatus.CANCELLED:
           if (booking.status !== BookingStatus.PENDING) throw new Error("Cannot cancel booking that is not pending");
-          booking.completedOn = new Date(new Date().toISOString());
           break;
         case BookingStatus.PICKED_UP:
           booking.startedOn = new Date(new Date().toISOString());
           break;
-        case BookingStatus.COMPLETED:
-          booking.completedOn = new Date(new Date().toISOString());
+        case BookingStatus.ARRIVED:
+          targetStatus = booking.paymentMethod === PaymentMethod.CARD ? BookingStatus.COMPLETED : targetStatus;
           break;
         default:
           break;
       }
       booking.status = targetStatus;
       booking.updatedBy = updatedById;
+      targetStatus === BookingStatus.COMPLETED ||
+        (BookingStatus.CANCELLED && (booking.completedOn = new Date(new Date().toISOString())));
+
       return await this.bookingRepository.save(booking);
     } catch (error) {
       throw new InternalServerErrorException(error.message);

@@ -2,7 +2,7 @@ import { BookingRoute } from "@db/entities";
 import { CreateRouteDto } from "@dtos";
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Point, Repository } from "typeorm";
 import { LocationService } from "../location/location.service";
 import { IBookingRoute } from "@types";
 
@@ -69,5 +69,21 @@ export class BookingRouteService {
         },
       },
     };
+  }
+
+  async getDistanceOfRoute(pickUpLocationId: string, destinationId: string): Promise<number> {
+    const pickUpLocation = await this.locationService.getLocationById(pickUpLocationId);
+    const destinationLocation = await this.locationService.getLocationById(destinationId);
+
+    const pickUp: Point = {
+      type: "Point",
+      coordinates: [pickUpLocation.coordinate["coordinates"][0], pickUpLocation.coordinate["coordinates"][1]],
+    };
+    const destination: Point = {
+      type: "Point",
+      coordinates: [destinationLocation.coordinate["coordinates"][0], destinationLocation.coordinate["coordinates"][1]],
+    };
+    const distance = this.locationService.calculateDistanceBetweenTwoLocations(pickUp, destination);
+    return parseFloat(distance.toFixed(2));
   }
 }
