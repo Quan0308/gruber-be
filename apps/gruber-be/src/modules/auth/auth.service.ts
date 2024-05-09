@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, InternalServerErrorException } from "@nestjs/common";
 import { FirebaseAdminService, MailService } from "@shared-modules";
 import { LoginDto, RegisterDto } from "@dtos";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -51,23 +51,6 @@ export class AuthService {
   }
 
   async verifyFirebaseToken(token: string) {
-    return this.firebaseAdminService.verifyToken(token);
-  }
-
-  async verifyEmail(id: string, token: string) {
-    try {
-      const result = await this.firebaseAdminService.verifyToken(token);
-      if (result) {
-        const user = await this.userRepository.findOne({ where: { id } });
-        await this.userRepository.save({
-          ...user,
-          confirmed: true,
-        });
-        return true;
-      }
-      return false;
-    } catch (ex) {
-      return false;
-    }
+    return await this.firebaseAdminService.verifyToken(token);
   }
 }
