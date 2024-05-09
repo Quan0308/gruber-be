@@ -105,19 +105,21 @@ export class BookingService {
       switch (targetStatus) {
         case BookingStatus.CANCELLED:
           if (booking.status !== BookingStatus.PENDING) throw new Error("Cannot cancel booking that is not pending");
-          booking.completedOn = new Date(new Date().toISOString());
           break;
         case BookingStatus.PICKED_UP:
           booking.startedOn = new Date(new Date().toISOString());
           break;
-        case BookingStatus.COMPLETED:
-          booking.completedOn = new Date(new Date().toISOString());
+        case BookingStatus.ARRIVED:
+          targetStatus = booking.paymentMethod === PaymentMethod.CARD ? BookingStatus.COMPLETED : targetStatus;
           break;
         default:
           break;
       }
       booking.status = targetStatus;
       booking.updatedBy = updatedById;
+      targetStatus === BookingStatus.COMPLETED ||
+        (BookingStatus.CANCELLED && (booking.completedOn = new Date(new Date().toISOString())));
+
       return await this.bookingRepository.save(booking);
     } catch (error) {
       throw new InternalServerErrorException(error.message);
