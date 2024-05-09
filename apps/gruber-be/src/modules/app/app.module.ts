@@ -7,6 +7,8 @@ import { AuthModule } from "../auth/auth.module";
 import { LocationModule } from "../location/location.module";
 import { BookingModule } from "../booking/booking.module";
 import { UserModule } from "../user/user.module";
+import { DriverInfoModule } from "../driver_info/driver_info.module";
+import { WalletModule } from "../wallet/wallet.module";
 
 @Module({
   imports: [
@@ -17,6 +19,8 @@ import { UserModule } from "../user/user.module";
     BookingModule,
     LocationModule,
     UserModule,
+    DriverInfoModule,
+    WalletModule,
   ],
   controllers: [AppController],
 })

@@ -4,9 +4,10 @@ import { UserController } from "./user.controller";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { User } from "@db/entities";
 import { BookingModule } from "../booking/booking.module";
+import { DriverInfoModule } from "../driver_info/driver_info.module";
 
 @Module({
-  imports: [forwardRef(() => BookingModule), TypeOrmModule.forFeature([User])],
+  imports: [DriverInfoModule, forwardRef(() => BookingModule), TypeOrmModule.forFeature([User])],
   providers: [UserService],
   controllers: [UserController],
   exports: [UserService],

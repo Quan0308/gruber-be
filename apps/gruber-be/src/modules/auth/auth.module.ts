@@ -7,9 +7,17 @@ import { AuthService } from "./auth.service";
 import { FirebaseStrategy } from "../../strategies/firebase.strategy";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { User } from "@db/entities";
+import { DriverInfoModule } from "../driver_info/driver_info.module";
 
 @Module({
-  imports: [PassportModule, ConfigModule, FirebaseModule, MailModule, TypeOrmModule.forFeature([User])],
+  imports: [
+    PassportModule,
+    ConfigModule,
+    FirebaseModule,
+    MailModule,
+    DriverInfoModule,
+    TypeOrmModule.forFeature([User]),
+  ],
   controllers: [AuthController],
   providers: [AuthService, FirebaseStrategy],
   exports: [AuthService],
