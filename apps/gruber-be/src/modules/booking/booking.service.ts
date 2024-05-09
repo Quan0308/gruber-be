@@ -134,6 +134,7 @@ export class BookingService {
         .select([
           "booking.id",
           "booking.bookingRouteId",
+          "booking.driverId",
           "booking.name",
           "booking.phone",
           "booking.status",
@@ -177,15 +178,15 @@ export class BookingService {
       id: booking.id,
       booking_route,
       driver: {
-        name: booking.driver.fullName,
-        phone: booking.driver.phone,
-        avatar: booking.driver.avatar,
-        plate: driver_vehicle.plate,
-        description: driver_vehicle.description,
+        name: booking?.driver?.fullName,
+        phone: booking?.driver?.phone,
+        avatar: booking?.driver?.avatar,
+        plate: driver_vehicle?.plate,
+        description: driver_vehicle?.description,
       },
       status: booking.status,
       payment_method: booking.paymentMethod,
-      vehicle_type: booking.vehicleType,
+      vehicle_type: booking?.vehicleType,
       price: booking.price,
     };
   }
@@ -194,11 +195,11 @@ export class BookingService {
     return {
       id: booking.id,
       booking_route,
-      name: booking.name,
-      phone: booking.phone,
+      name: booking?.name,
+      phone: booking?.phone,
       status: booking.status,
       payment_method: booking.paymentMethod,
-      vehicle_type: booking.vehicleType,
+      vehicle_type: booking?.vehicleType,
       price: booking.price,
     };
   }
