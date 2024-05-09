@@ -15,4 +15,9 @@ export class AuthController {
   async login(@Body() payload: LoginDto) {
     return this.authService.verifyUser(payload);
   }
+
+  @Post("verify-token")
+  async verifyToken(@Body() payload: { token: string }) {
+    return await this.authService.verifyFirebaseToken(payload.token);
+  }
 }

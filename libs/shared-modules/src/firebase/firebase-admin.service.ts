@@ -39,13 +39,13 @@ export class FirebaseAdminService {
     return { userRecord, emailVerificationLink };
   }
 
-  async verifyToken(idtoken: string) {
+  async verifyToken(token: string) {
     try {
-      await admin
+      return await admin
         .auth()
-        .verifyIdToken(idtoken)
+        .verifyIdToken(token)
         .then((claims) => {
-          console.log(claims?.role);
+          return claims?.role;
         });
     } catch (error) {
       if (error.code === FirebaseErrorCodeEnum.TOKEN_EXPIRED) {
