@@ -1,4 +1,4 @@
-import { BookingStatus, PaymentMethod } from "@types";
+import { BookingStatus, PaymentMethod, RoleEnum } from "@types";
 import {
   Entity,
   Column,
@@ -7,6 +7,8 @@ import {
   CreateDateColumn,
   ManyToOne,
   UpdateDateColumn,
+  BeforeUpdate,
+  JoinColumn,
 } from "typeorm";
 
 import { User } from "./user.entity";
@@ -24,6 +26,9 @@ export class Booking extends BaseEntity {
 
   @Column({ name: "ordered_by_id", type: "uuid", nullable: false })
   ordered_by_Id: string;
+
+  @Column({ name: "name", type: "varchar", length: 255, nullable: true, default: null })
+  name: string;
 
   @Column({ name: "phone", type: "varchar", length: 10, nullable: true, default: null })
   phone: string;
@@ -74,6 +79,7 @@ export class Booking extends BaseEntity {
   status: BookingStatus;
 
   @ManyToOne(() => User)
+  @JoinColumn({ name: "driver_id" })
   driver: User;
 
   @ManyToOne(() => User)
@@ -87,4 +93,13 @@ export class Booking extends BaseEntity {
 
   @ManyToOne(() => Transaction)
   transaction: Transaction;
+
+  @BeforeUpdate()
+  async checkDriverRole() {
+    if (!this.driverId) return;
+    const driver = await User.findOne({ where: { id: this.driverId } });
+    if (!driver || driver.role !== RoleEnum.DRIVER) {
+      throw new Error("Driver not found");
+    }
+  }
 }

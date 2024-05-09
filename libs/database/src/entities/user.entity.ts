@@ -44,9 +44,6 @@ export class User extends BaseEntity {
   })
   updatedOn: Date;
 
-  @Column({ name: "confirmed", type: "boolean", nullable: false, default: false })
-  confirmed: Boolean;
-
   @OneToOne(() => CardInfo)
   cardInfo: CardInfo;
 

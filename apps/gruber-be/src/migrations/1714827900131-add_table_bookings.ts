@@ -27,10 +27,18 @@ export class AddTableBookings1714827900131 implements MigrationInterface {
             isNullable: false,
           },
           {
+            name: "name",
+            type: "varchar",
+            length: "255",
+            isNullable: true,
+            default: null,
+          },
+          {
             name: "phone",
             type: "varchar",
             length: "10",
             isNullable: true,
+            default: null,
           },
           {
             name: "created_on",
@@ -86,8 +94,8 @@ export class AddTableBookings1714827900131 implements MigrationInterface {
             name: "payment_method",
             type: "enum",
             enum: ["card", "cash"],
-            isNullable: false,
-            default: "'card'",
+            isNullable: true,
+            default: "null",
           },
           {
             name: "vehicle_type",
@@ -99,7 +107,8 @@ export class AddTableBookings1714827900131 implements MigrationInterface {
           {
             name: "transaction_id",
             type: "uuid",
-            isNullable: false,
+            isNullable: true,
+            default: null,
           },
           {
             name: "status",

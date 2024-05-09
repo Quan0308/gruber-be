@@ -1,10 +1,10 @@
 import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { AxiosInstance } from "axios";
 import { App, AppOptions, initializeApp } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
 import { genericHttpConsumer } from "@utils";
 import { ConfigService } from "@nestjs/config";
-import { FirebaseErrorCodeEnum } from "@types";
+import { FirebaseErrorCodeEnum, RoleEnum } from "@types";
+import * as admin from "firebase-admin";
 @Injectable()
 export class FirebaseAdminService {
   private readonly app: App;
@@ -29,23 +29,38 @@ export class FirebaseAdminService {
     });
   }
 
-  async createNewUser(email: string, password: string) {
-    return this.httpService.post(`${this.authDomain}/accounts:signUp?key=${this.apiKey}`, {
+  async createNewUser(email: string, password: string, role: RoleEnum = RoleEnum.PASSENGER) {
+    const userRecord = await admin.auth().createUser({
       email,
       password,
-      returnSecureToken: true,
     });
+    await admin.auth().setCustomUserClaims(userRecord.uid, { role });
+    const emailVerificationLink = await this.generateEmailVerificationLink(email);
+    return { userRecord, emailVerificationLink };
   }
 
-  async verifyToken(token: string) {
+  async verifyToken(idtoken: string) {
     try {
-      const auth = getAuth(this.app);
-      return auth.verifyIdToken(token);
+      await admin
+        .auth()
+        .verifyIdToken(idtoken)
+        .then((claims) => {
+          console.log(claims?.role);
+        });
     } catch (error) {
       if (error.code === FirebaseErrorCodeEnum.TOKEN_EXPIRED) {
         return new UnauthorizedException(error.message);
       }
       throw error;
     }
+  }
+
+  async checkVerifiedEmail(uid: string) {
+    const user = await admin.auth().getUser(uid);
+    return user.emailVerified;
+  }
+
+  async generateEmailVerificationLink(email: string) {
+    return admin.auth().generateEmailVerificationLink(email);
   }
 }

@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { FirebaseAdminService, MailService } from "@shared-modules";
-import { LoginDto } from "@dtos";
-import { IVerifyFirebaseResponse } from "@types";
+import { LoginDto, RegisterDto } from "@dtos";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "@db/entities";
 import { Repository } from "typeorm";
@@ -14,13 +13,15 @@ export class AuthService {
     private readonly userRepository: Repository<User>
   ) {}
 
-  async registerUser(data: LoginDto) {
-    let registerResponse: IVerifyFirebaseResponse;
+  async registerUser(data: RegisterDto) {
     try {
-      const result = await this.firebaseAdminService.createNewUser(data.email, data.password);
-      registerResponse = result.data;
-      const newUser = await this.userRepository.save({ firebaseUid: result.data.localId });
-      return await this.mailService.sendUserConfirmation(newUser.id, registerResponse.idToken, data.email);
+      const { userRecord, emailVerificationLink } = await this.firebaseAdminService.createNewUser(
+        data.email,
+        data.password,
+        data.role
+      );
+      await this.userRepository.save({ firebaseUid: userRecord.uid, role: data.role });
+      return await this.mailService.sendUserConfirmation(data.email, data.email, emailVerificationLink);
     } catch (ex) {
       switch (ex.response?.error?.message) {
         case "EMAIL_EXISTS":
@@ -31,16 +32,16 @@ export class AuthService {
   }
 
   async verifyUser(data: LoginDto) {
-    let verifyResponse: IVerifyFirebaseResponse;
     try {
-      const result = await this.firebaseAdminService.verifyUser(data.email, data.password);
-      verifyResponse = result.data;
-      const user = await this.userRepository.findOne({ where: { firebaseUid: verifyResponse.localId } });
-      if (!user.confirmed) {
-        await this.mailService.sendUserConfirmation(user.id, verifyResponse.localId, data.email);
+      const user = await this.firebaseAdminService.verifyUser(data.email, data.password);
+      const isVerifiedEmail = await this.firebaseAdminService.checkVerifiedEmail(user.data.localId);
+      if (!isVerifiedEmail) {
+        const emailVerificationLink = await this.firebaseAdminService.generateEmailVerificationLink(data.email);
+        await this.mailService.sendUserConfirmation(data.email, user.data.displayName, emailVerificationLink);
         return new BadRequestException("Please confirm your email");
       }
-      return verifyResponse;
+      const userEntity = await this.userRepository.findOne({ where: { firebaseUid: user.data.localId } });
+      return { id: userEntity.id, ...user.data };
     } catch (ex) {
       if (ex.response.error.message === "INVALID_LOGIN_CREDENTIALS") {
         throw new BadRequestException("Invalid login credentials");
