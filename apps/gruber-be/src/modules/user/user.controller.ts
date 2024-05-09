@@ -1,11 +1,16 @@
-import { Body, Controller, Get, Patch, Param } from "@nestjs/common";
+import { Body, Controller, Get, Patch, Param, Post } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { BookingService } from "../booking/booking.service";
-import { UpdateUserGeneralInfoDto } from "@dtos";
+import { CardInfoService } from "../card_info/card_info.service";
+import { CreateCardInfoDto, UpdateUserGeneralInfoDto } from "@dtos";
 
 @Controller("users")
 export class UserController {
-  constructor(private readonly userService: UserService, private readonly bookingService: BookingService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly bookingService: BookingService,
+    private readonly cardInfoService: CardInfoService
+  ) {}
 
   // allow role driver or passenger
   @Get(":id/current-booking")
@@ -16,6 +21,11 @@ export class UserController {
   @Get(":id")
   async getUserById(@Param("id") id: string) {
     return await this.userService.getUserById(id);
+  }
+
+  @Get(":id/card-info")
+  async getCardInfo(@Param("id") id: string) {
+    return await this.cardInfoService.getCardInfoByOwnerId(id);
   }
 
   @Patch(":id/general-info")
