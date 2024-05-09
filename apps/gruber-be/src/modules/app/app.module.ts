@@ -7,6 +7,7 @@ import { AuthModule } from "../auth/auth.module";
 import { LocationModule } from "../location/location.module";
 import { BookingModule } from "../booking/booking.module";
 import { UserModule } from "../user/user.module";
+import { CardInfoModule } from "../card_info/card_info.module";
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UserModule } from "../user/user.module";
     BookingModule,
     LocationModule,
     UserModule,
+    CardInfoModule,
   ],
   controllers: [AppController],
 })
