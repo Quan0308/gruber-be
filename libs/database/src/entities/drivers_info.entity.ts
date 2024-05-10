@@ -36,6 +36,7 @@ export class DriverInfor extends BaseEntity {
   isValidated: boolean;
 
   @OneToOne(() => DriverVehicle)
+  @JoinColumn({ name: "vehicle_id", referencedColumnName: "id" })
   driverVehicle: DriverVehicle;
 
   @OneToOne(() => Wallet)

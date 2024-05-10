@@ -53,6 +53,14 @@ export class DriverInfoService {
     return await this.vehicleService.createVehicle({ ...data, ownerId: driver_id });
   }
 
+  async getDriverVehicleByDriverId(driver_id: string) {
+    const driver = await this.driverInforRepository.findOne({
+      where: { driverId: driver_id },
+      relations: { driverVehicle: true },
+    });
+    return driver?.driverVehicle;
+  }
+
   async validateDriver(driverId: string) {
     try {
       const driver = await this.driverInforRepository.findOne({ where: { driverId } });
