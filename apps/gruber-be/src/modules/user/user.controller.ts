@@ -2,15 +2,17 @@ import { Body, Controller, Get, Patch, Param, Query, Post } from "@nestjs/common
 import { UserService } from "./user.service";
 import { BookingService } from "../booking/booking.service";
 import { CardInfoService } from "../card_info/card_info.service";
-import { CreateCardInfoDto, UpdateUserGeneralInfoDto } from "@dtos";
+import { CreateVehicleDto, UpdateUserGeneralInfoDto } from "@dtos";
 import { RoleEnum } from "@types";
+import { DriverInfoService } from "../driver_info/driver_info.service";
 
 @Controller("users")
 export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly bookingService: BookingService,
-    private readonly cardInfoService: CardInfoService
+    private readonly cardInfoService: CardInfoService,
+    private readonly driverInfoService: DriverInfoService
   ) {}
 
   // allow role driver or passenger
@@ -52,5 +54,11 @@ export class UserController {
   @Patch(":id/validate")
   async validateDriver(@Param("id") id: string) {
     return await this.userService.validateDriver(id);
+  }
+
+  @Post(":id/vehicle/create")
+  async createDriverVehicle(@Param("id") id: string, @Body() data: CreateVehicleDto) {
+    await this.driverInfoService.createDriverVehicle(data, id);
+    return await this.driverInfoService.updateDriverVehicle(id);
   }
 }
