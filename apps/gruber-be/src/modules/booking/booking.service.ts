@@ -1,5 +1,5 @@
 import { Booking, DriverVehicle } from "@db/entities";
-import { CreateBookingByPassengerDto, CreateBookingByStaffDto } from "@dtos";
+import { CreateBookingByPassengerDto, CreateBookingByStaffDto, MakeTransactionDto } from "@dtos";
 import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Brackets, Repository } from "typeorm";
@@ -13,7 +13,9 @@ import {
   ICurrentBookingUser,
   PaymentMethod,
   RoleEnum,
+  TransactionType,
   VehicleTypePrice,
+  WalletType,
 } from "@types";
 import { plainToClass } from "class-transformer";
 import { UserService } from "../user/user.service";
@@ -122,7 +124,14 @@ export class BookingService {
       targetStatus === BookingStatus.COMPLETED ||
         (BookingStatus.CANCELLED && (booking.completedOn = new Date(new Date().toISOString())));
 
-      return await this.bookingRepository.save(booking);
+      const newBooking = await this.bookingRepository.save(booking);
+      if (booking.paymentMethod === PaymentMethod.CARD && (targetStatus === BookingStatus.COMPLETED || targetStatus === BookingStatus.ARRIVED)) {
+        this.userService.makeTransactionWallet(booking.driverId, {amount: Math.ceil(0.7 * booking.price), wallet: WalletType.CASH ,transaction_type: TransactionType.DEPOSIT})
+      }
+      else if (booking.paymentMethod === PaymentMethod.CASH && targetStatus === BookingStatus.COMPLETED) {
+        this.userService.makeTransactionWallet(booking.driverId, {amount: booking.price - Math.ceil(0.7 * booking.price), wallet: WalletType.CREDIT ,transaction_type: TransactionType.WITHDRAW})
+      }        
+      return newBooking;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
@@ -140,7 +149,7 @@ export class BookingService {
           ? query.where("booking.driverId = :id", { id: userId })
           : query.where("booking.ordered_by_Id = :id", { id: userId });
       const booking = await query
-        .andWhere("booking.status != :status", { status: BookingStatus.COMPLETED && BookingStatus.CANCELLED })
+      .andWhere("booking.status NOT IN (:...status)", { status: [BookingStatus.CANCELLED, BookingStatus.COMPLETED] })
         .orderBy("booking.createdOn", "DESC")
         .select([
           "booking.id",

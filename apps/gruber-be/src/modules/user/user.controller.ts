@@ -1,8 +1,8 @@
-import { Body, Controller, Get, Patch, Param, Query, Post } from "@nestjs/common";
+import { Body, Controller, Get, Patch, Param, Query, Post, ValidationPipe } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { BookingService } from "../booking/booking.service";
 import { CardInfoService } from "../card_info/card_info.service";
-import { CreateVehicleDto, UpdateUserGeneralInfoDto } from "@dtos";
+import { CreateVehicleDto, MakeTransactionDto, UpdateUserGeneralInfoDto } from "@dtos";
 import { RoleEnum } from "@types";
 import { DriverInfoService } from "../driver_info/driver_info.service";
 
@@ -44,6 +44,16 @@ export class UserController {
   @Get(":id/card-info")
   async getCardInfo(@Param("id") id: string) {
     return await this.cardInfoService.getCardInfoByOwnerId(id);
+  }
+
+  @Get(":id/wallets")
+  async getWallets(@Param("id") id: string) {
+    return await this.userService.getWallets(id);
+  }
+
+  @Post(":id/wallets")
+  async makeTransaction(@Param("id") id: string, @Body(new ValidationPipe()) data: MakeTransactionDto) {
+    return await this.userService.makeTransactionWallet(id, data);
   }
 
   @Patch(":id/general-info")
