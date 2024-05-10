@@ -2,10 +2,12 @@ import { Booking, DriverVehicle } from "@db/entities";
 import { CreateBookingByPassengerDto, CreateBookingByStaffDto } from "@dtos";
 import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Not, Repository } from "typeorm";
+import { Brackets, Repository } from "typeorm";
 import { BookingRouteService } from "../booking_route/booking-route.service";
 import {
   BookingStatus,
+  IAllBookings,
+  IBookingDetail,
   IBookingRoute,
   ICurrentBookingDriver,
   ICurrentBookingUser,
@@ -167,12 +169,142 @@ export class BookingService {
     }
   }
 
-  async getAllBookings() {
+  async getAllBookings(user_id: string): Promise<IAllBookings[]> {
+    const user = await this.userService.getUserById(user_id);
     try {
-      return await this.bookingRepository.find({
-        where: { status: Not(BookingStatus.COMPLETED) },
-        order: { createdOn: "DESC" },
+      const whereClause = user.role === RoleEnum.DRIVER ? { driverId: user_id } : { ordered_by_Id: user_id };
+      const bookings = await this.bookingRepository
+        .createQueryBuilder("booking")
+        .where(whereClause)
+        .andWhere(
+          new Brackets((qb) => {
+            qb.where("booking.status = :completed", { completed: BookingStatus.COMPLETED }).orWhere(
+              "booking.status = :cancelled",
+              { cancelled: BookingStatus.CANCELLED }
+            );
+          })
+        )
+        .select([
+          "booking.id",
+          "booking.paymentMethod",
+          "booking.completedOn",
+          "booking.price",
+          "booking.vehicleType",
+          "booking.status",
+        ])
+        .orderBy("booking.createdOn", "DESC")
+        .leftJoin("booking.route", "route")
+        .addSelect(["route.id"])
+        .leftJoin("route.pickupLocation", "pickupLocation", "pickupLocation.id = route.pickupLocationId")
+        .addSelect(["pickupLocation.formattedAddress", "pickupLocation.name", "pickupLocation.coordinate"])
+        .leftJoin("route.destination", "destination", "destination.id = route.destinationId")
+        .addSelect(["destination.formattedAddress", "destination.name", "destination.coordinate"])
+        .getMany();
+      return bookings.map((booking): IAllBookings => {
+        return {
+          id: booking.id,
+          booking_route: {
+            pick_up: {
+              formatted_address: booking.route.pickupLocation.formattedAddress,
+              name: booking.route.pickupLocation.name,
+              location: {
+                lat: booking.route.pickupLocation.coordinate["coordinates"][1],
+                lng: booking.route.pickupLocation.coordinate["coordinates"][0],
+              },
+            },
+            destination: {
+              formatted_address: booking.route.destination.formattedAddress,
+              name: booking.route.destination.name,
+              location: {
+                lat: booking.route.destination.coordinate["coordinates"][1],
+                lng: booking.route.destination.coordinate["coordinates"][0],
+              },
+            },
+          },
+          price: booking.price,
+          vehicle_type: booking.vehicleType,
+          payment_method: booking.paymentMethod,
+          finished_on: booking?.completedOn?.toISOString(),
+        };
       });
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+
+  async getBookingDetail(bookingId: string): Promise<IBookingDetail> {
+    try {
+      const booking = await this.bookingRepository
+        .createQueryBuilder("booking")
+        .where("booking.id = :id", { id: bookingId })
+        .andWhere(
+          new Brackets((qb) => {
+            qb.where("booking.status = :completed", { completed: BookingStatus.COMPLETED }).orWhere(
+              "booking.status = :cancelled",
+              { cancelled: BookingStatus.CANCELLED }
+            );
+          })
+        )
+        .select([
+          "booking.id",
+          "booking.driverId",
+          "booking.paymentMethod",
+          "booking.started_on",
+          "booking.completedOn",
+          "booking.price",
+          "booking.vehicleType",
+          "booking.driverRating",
+          "booking.passengerRating",
+          "booking.phone",
+          "booking.name",
+          "booking.status",
+        ])
+        .leftJoin("booking.driver", "driver")
+        .addSelect(["driver.fullName", "driver.avatar"])
+        .leftJoin("booking.route", "route")
+        .addSelect(["route.id"])
+        .leftJoin("route.pickupLocation", "pickupLocation", "pickupLocation.id = route.pickupLocationId")
+        .addSelect(["pickupLocation.formattedAddress", "pickupLocation.name", "pickupLocation.coordinate"])
+        .leftJoin("route.destination", "destination", "destination.id = route.destinationId")
+        .addSelect(["destination.formattedAddress", "destination.name", "destination.coordinate"])
+        .getOne();
+      if (!booking) {
+        throw new NotFoundException("Booking not found");
+      }
+      return {
+        id: booking.id,
+        driver: {
+          name: booking?.driver?.fullName,
+          avatar: booking?.driver?.avatar,
+        },
+        booking_route: {
+          pick_up: {
+            formatted_address: booking.route.pickupLocation.formattedAddress,
+            name: booking.route.pickupLocation.name,
+            location: {
+              lat: booking.route.pickupLocation.coordinate["coordinates"][1],
+              lng: booking.route.pickupLocation.coordinate["coordinates"][0],
+            },
+          },
+          destination: {
+            formatted_address: booking.route.destination.formattedAddress,
+            name: booking.route.destination.name,
+            location: {
+              lat: booking.route.destination.coordinate["coordinates"][1],
+              lng: booking.route.destination.coordinate["coordinates"][0],
+            },
+          },
+        },
+        phone: booking.phone,
+        name: booking.name,
+        passenger_rating: booking.passengerRating,
+        driver_rating: booking.driverRating,
+        price: booking.price,
+        vehicle_type: booking.vehicleType,
+        payment_method: booking.paymentMethod,
+        started_on: booking?.startedOn?.toISOString(),
+        finished_on: booking?.completedOn?.toISOString(),
+      };
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
@@ -217,9 +349,12 @@ export class BookingService {
     //distance in meters
     return {
       motorbike:
-        VehicleTypePrice.MOTORBIKE.FIRST_2_KM + ((distance - 2000) / 1000) * VehicleTypePrice.MOTORBIKE.NEXT_PER_KM,
-      car4: VehicleTypePrice.CAR4.FIRST_2_KM + ((distance - 2000) / 1000) * VehicleTypePrice.CAR4.NEXT_PER_KM,
-      car7: VehicleTypePrice.CAR7.FIRST_2_KM + ((distance - 2000) / 1000) * VehicleTypePrice.CAR7.NEXT_PER_KM,
+        VehicleTypePrice.MOTORBIKE.FIRST_2_KM +
+        (Math.max(0, distance - 2000) / 1000) * VehicleTypePrice.MOTORBIKE.NEXT_PER_KM,
+      car4:
+        VehicleTypePrice.CAR4.FIRST_2_KM + (Math.max(0, distance - 2000) / 1000) * VehicleTypePrice.CAR4.NEXT_PER_KM,
+      car7:
+        VehicleTypePrice.CAR7.FIRST_2_KM + (Math.max(0, distance - 2000) / 1000) * VehicleTypePrice.CAR7.NEXT_PER_KM,
     };
   }
 }

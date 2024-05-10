@@ -9,14 +9,14 @@ import { BookingStatus } from "@types";
 export class BookingController {
   constructor(private readonly bookingService: BookingService) {}
 
-  @Get()
-  async getAllBookings() {
-    return await this.bookingService.getAllBookings();
-  }
-
   @Get("price")
   getVehicleTypePrice(@Query("distance") distance: number) {
     return this.bookingService.getPriceByDistance(distance);
+  }
+
+  @Get(":id")
+  getBookingDetail(@Param("id") id: string) {
+    return this.bookingService.getBookingDetail(id);
   }
 
   //@Use
