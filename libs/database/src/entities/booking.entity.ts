@@ -9,10 +9,12 @@ import {
   UpdateDateColumn,
   BeforeUpdate,
   JoinColumn,
+  OneToOne,
 } from "typeorm";
 
 import { User } from "./user.entity";
 import { Transaction } from "./transaction.entity";
+import { BookingRoute } from "./booking_route.entity";
 @Entity({ name: "bookings" })
 export class Booking extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
@@ -77,6 +79,10 @@ export class Booking extends BaseEntity {
 
   @Column({ name: "status", type: "enum", enum: BookingStatus, nullable: false, default: BookingStatus.PENDING })
   status: BookingStatus;
+
+  @OneToOne(() => BookingRoute)
+  @JoinColumn({ name: "booking_route_id" })
+  route: BookingRoute;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: "driver_id" })
