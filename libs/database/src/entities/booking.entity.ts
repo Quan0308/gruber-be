@@ -74,9 +74,6 @@ export class Booking extends BaseEntity {
   @Column({ name: "vehicle_type", type: "varchar", length: 255, nullable: false, default: "" })
   vehicleType: string;
 
-  @Column({ name: "transaction_id", type: "uuid", nullable: true, default: null })
-  transactionId: string;
-
   @Column({ name: "status", type: "enum", enum: BookingStatus, nullable: false, default: BookingStatus.PENDING })
   status: BookingStatus;
 
@@ -96,9 +93,6 @@ export class Booking extends BaseEntity {
 
   @ManyToOne(() => User)
   updatedByUser: User;
-
-  @ManyToOne(() => Transaction)
-  transaction: Transaction;
 
   @BeforeUpdate()
   async checkDriverRole() {

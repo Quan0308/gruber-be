@@ -4,11 +4,13 @@ import { LoginDto, RegisterDto } from "@dtos";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "@db/entities";
 import { Repository } from "typeorm";
+import { DriverInfoService } from "../driver_info/driver_info.service";
 @Injectable()
 export class AuthService {
   constructor(
     private readonly firebaseAdminService: FirebaseAdminService,
     private readonly mailService: MailService,
+    private readonly driverInfoService: DriverInfoService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>
   ) {}
@@ -20,7 +22,10 @@ export class AuthService {
         data.password,
         data.role
       );
-      await this.userRepository.save({ firebaseUid: userRecord.uid, role: data.role });
+      const driver = await this.userRepository.save({ firebaseUid: userRecord.uid, role: data.role });
+      if (data.role === "driver") {
+        await this.driverInfoService.createDriverInfo(driver.id);
+      }
       return await this.mailService.sendUserConfirmation(data.email, data.email, emailVerificationLink);
     } catch (ex) {
       switch (ex.response?.error?.message) {

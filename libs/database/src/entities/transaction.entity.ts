@@ -21,21 +21,9 @@ export class Transaction extends BaseEntity {
   })
   transactionDate: Date;
 
-  @Column({ name: "type", type: "enum", enum: TransactionType, nullable: false, default: TransactionType.DEPOSIT })
-  type: TransactionType;
+  @Column({ name: "sender", type: "varchar", length: "20", nullable: false })
+  sender: string;
 
-  @Column({
-    name: "status",
-    type: "enum",
-    enum: TransactionStatus,
-    nullable: false,
-    default: TransactionStatus.PENDING,
-  })
-  status: TransactionStatus;
-
-  @Column({ name: "description", type: "varchar", length: 255, nullable: true, default: null })
-  description: string;
-
-  @ManyToOne(() => Wallet, (wallet) => wallet.transaction)
-  wallet: Wallet;
+  @Column({ name: "receiver", type: "varchar", length: "20", nullable: false })
+  receiver: string;
 }
