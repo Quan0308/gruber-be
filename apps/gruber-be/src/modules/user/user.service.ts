@@ -1,4 +1,4 @@
-import { User } from "@db/index";
+import { User } from "@db/entities";
 import { UpdateUserGeneralInfoDto } from "@dtos";
 import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";

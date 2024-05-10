@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { BookingRouteService } from "./booking-route.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { BookingRoute } from "@db/entities";
+import { BookingRoute } from "@db/entities/booking_route.entity";
 import { LocationModule } from "../location/location.module";
 
 @Module({

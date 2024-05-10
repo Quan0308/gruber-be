@@ -1,5 +1,15 @@
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
-import { LocationRecord } from "@entities";
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
+import { LocationRecord } from "./location_record.entity";
+import { Booking } from "./booking.entity";
 
 @Entity({ name: "bookings_route" })
 export class BookingRoute extends BaseEntity {
@@ -19,4 +29,7 @@ export class BookingRoute extends BaseEntity {
   @ManyToOne(() => LocationRecord)
   @JoinColumn({ name: "destination_id" })
   destination: LocationRecord;
+
+  @OneToMany(() => Booking, (booking) => booking.route)
+  bookings: Booking[];
 }

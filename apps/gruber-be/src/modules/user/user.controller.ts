@@ -13,6 +13,16 @@ export class UserController {
   ) {}
 
   // allow role driver or passenger
+  @Get(":id/bookings")
+  async getAllBookings(@Param("id") id: string) {
+    return await this.bookingService.getAllBookings(id);
+  }
+
+  @Get(":id/bookings/:bookingId")
+  async getBookingById(@Param("id") id: string, @Param("bookingId") bookingId: string) {
+    return await this.bookingService.getBookingDetail(bookingId);
+  }
+
   @Get(":id/current-booking")
   async getCurrentBooking(@Param("id") id: string) {
     return await this.bookingService.getCurrentBookingByUserId(id);

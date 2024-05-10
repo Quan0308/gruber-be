@@ -5,3 +5,5 @@ export * from "./booking-route.interface";
 export * from "./driver.interface";
 export * from "./current-booking-user.interface";
 export * from "./current-booking-driver.interface";
+export * from "./all-bookings.interface";
+export * from "./booking-detail.interface";
