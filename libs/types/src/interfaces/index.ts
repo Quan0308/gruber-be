@@ -7,3 +7,4 @@ export * from "./current-booking-user.interface";
 export * from "./current-booking-driver.interface";
 export * from "./all-bookings.interface";
 export * from "./booking-detail.interface";
+export * from "./driver-vehicle.interface";

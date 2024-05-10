@@ -7,3 +7,4 @@ export * from "./payment-method.enum";
 export * from "./wallet-type.enum";
 export * from "./activity-status.enum";
 export * from "./transaction-type.enum";
+export * from "./vehicle-type.enum";
