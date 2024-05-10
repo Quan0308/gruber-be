@@ -7,12 +7,10 @@ import {
   UpdateDateColumn,
   OneToMany,
   OneToOne,
-  JoinColumn,
 } from "typeorm";
 import { RoleEnum } from "@types";
 import { Booking } from "./booking.entity";
 import { CardInfo } from "./card_info.entity";
-import { DriverInfor } from "./drivers_info.entity";
 
 @Entity({ name: "users" })
 export class User extends BaseEntity {
@@ -54,7 +52,4 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Booking, (booking) => booking.order)
   orders: Booking[];
-
-  @OneToOne(() => DriverInfor, (driverInfor) => driverInfor.user)
-  driverInfor: DriverInfor;
 }
