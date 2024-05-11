@@ -11,6 +11,7 @@ import { DriverInfoModule } from "../driver_info/driver_info.module";
 import { WalletModule } from "../wallet/wallet.module";
 import { CardInfoModule } from "../card_info/card_info.module";
 import { VehicleModule } from "../vehicle/vehicle.module";
+import { GatewayModule } from "../gateway/gateway.module";
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { VehicleModule } from "../vehicle/vehicle.module";
     WalletModule,
     CardInfoModule,
     VehicleModule,
+    GatewayModule,
   ],
   controllers: [AppController],
 })
