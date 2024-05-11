@@ -1,5 +1,5 @@
 import { Booking, DriverVehicle } from "@db/entities";
-import { CreateBookingByPassengerDto, CreateBookingByStaffDto } from "@dtos";
+import { CreateAssignBookingDriverMessageDto, CreateBookingByPassengerDto, CreateBookingByStaffDto } from "@dtos";
 import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Brackets, Repository } from "typeorm";
@@ -11,12 +11,14 @@ import {
   IBookingRoute,
   ICurrentBookingDriver,
   ICurrentBookingUser,
+  MessageBooking,
   PaymentMethod,
   RoleEnum,
   VehicleTypePrice,
 } from "@types";
 import { plainToClass } from "class-transformer";
 import { UserService } from "../user/user.service";
+import { BookingGateway } from "../gateway/booking.gateway";
 
 @Injectable()
 export class BookingService {
@@ -26,7 +28,8 @@ export class BookingService {
     @InjectRepository(DriverVehicle)
     private driverVehicleRepository: Repository<DriverVehicle>,
     private readonly userService: UserService,
-    private readonly bookingRouteService: BookingRouteService
+    private readonly bookingRouteService: BookingRouteService,
+    private readonly bookingGateway: BookingGateway
   ) {}
 
   async createBooking(data: CreateBookingByPassengerDto | CreateBookingByStaffDto) {
@@ -79,7 +82,7 @@ export class BookingService {
       );
       const distance = await this.bookingRouteService.getDistanceOfRoute(route.pickupLocationId, route.destinationId);
       const price = this.getPriceByDistance(distance * 1000);
-      return await this.bookingRepository.save({
+      const newBooking = await this.bookingRepository.save({
         ordered_by_Id: user_id,
         driverId: driver_id,
         name,
@@ -91,6 +94,21 @@ export class BookingService {
         updatedBy: user_id,
         paymentMethod: PaymentMethod.CASH,
       });
+
+      const bookingRoute = await this.bookingRouteService.getBookingRouteDetails(route.id);
+
+      const socketBody: CreateAssignBookingDriverMessageDto = {
+        booking_id: newBooking.id,
+        driver_id: newBooking.driverId,
+        booking_route: {
+          pick_up: bookingRoute.pick_up,
+          destination: bookingRoute.destination,
+        },
+        message: MessageBooking.CREATE_ASSIGN_BOOKING_DRIVER,
+      };
+
+      this.bookingGateway.sendAssignmentMessage(socketBody);
+      return newBooking;
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException();
