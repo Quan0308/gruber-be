@@ -4,7 +4,7 @@ import { BadRequestException, Injectable, InternalServerErrorException, NotFound
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { DriverInfoService } from "../driver_info/driver_info.service";
-import { RoleEnum, TransactionType, WalletType } from "@types";
+import { RoleEnum } from "@types";
 
 @Injectable()
 export class UserService {
@@ -29,18 +29,29 @@ export class UserService {
   async getUsersByParams(params: any) {
     if (params.role == "admin") return [];
     if (params.role == "driver") {
-      const users = await this.userRepository.find({
-        where: params,
-        relations: ["driverInfor"],
-      });
+      const users = await this.userRepository
+        .createQueryBuilder("user")
+        .where("user.role = :role", { role: RoleEnum.DRIVER })
+        .select(["user.id", "user.fullName", "user.phone", "user.avatar"])
+        .leftJoin("user.driverInfor", "driverInfor")
+        .addSelect(["driverInfor.id", "driverInfor.activityStatus", "driverInfor.isValidated"])
+        .leftJoin("driverInfor.driverVehicle", "vehicle")
+        .addSelect(["vehicle.id", "vehicle.plate", "vehicle.description", "vehicle.type"])
+        .getMany();
 
-      return users.map((user) => ({
-        id: user.id,
-        fullName: user.fullName,
-        phone: user.phone,
-        isValidated: user.driverInfor?.isValidated,
-        vehicleId: user.driverInfor?.vehicleId,
-      }));
+      return users.map((user) => {
+        return {
+          id: user.id,
+          fullName: user.fullName,
+          phone: user.phone,
+          avatar: user.avatar,
+          activityStatus: user.driverInfor.activityStatus,
+          isValidated: user.driverInfor.isValidated,
+          vehicle_type: user.driverInfor.driverVehicle?.type,
+          vehicle_plate: user.driverInfor.driverVehicle?.plate,
+          vehicle_description: user.driverInfor.driverVehicle?.description,
+        };
+      });
     }
   }
 

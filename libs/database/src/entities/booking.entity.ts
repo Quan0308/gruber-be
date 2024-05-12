@@ -13,7 +13,6 @@ import {
 } from "typeorm";
 
 import { User } from "./user.entity";
-import { Transaction } from "./transaction.entity";
 import { BookingRoute } from "./booking_route.entity";
 @Entity({ name: "bookings" })
 export class Booking extends BaseEntity {

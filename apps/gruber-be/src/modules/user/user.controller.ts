@@ -17,8 +17,8 @@ export class UserController {
 
   // allow role driver or passenger
   @Get(":id/bookings")
-  async getAllBookings(@Param("id") id: string) {
-    return await this.bookingService.getAllBookings(id);
+  async getAllBookingsByUserId(@Param("id") id: string) {
+    return await this.bookingService.getAllBookingsByUserId(id);
   }
 
   @Get(":id/bookings/:bookingId")
