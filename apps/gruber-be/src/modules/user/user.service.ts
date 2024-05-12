@@ -39,6 +39,7 @@ export class UserService {
         phone: user.phone,
         isValidated: user.driverInfor?.isValidated,
         vehicleId: user.driverInfor?.vehicleId,
+        activity_status: user.driverInfor?.activityStatus,
       }));
     }
   }
