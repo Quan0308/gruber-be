@@ -9,8 +9,13 @@ import { NestFactory } from "@nestjs/core";
 import { TransformResponseInterceptor, ExceptionHandlerInterceptor } from "@utils";
 import { AppModule } from "./modules/app/app.module";
 import { CorsOptions } from "@nestjs/common/interfaces/external/cors-options.interface";
+import * as fs from 'fs';
 
 async function bootstrap() {
+  const httpsOptions = {
+    key: fs.readFileSync('./apps/gruber-be/src/cert/key.pem'),
+    cert: fs.readFileSync('./apps/gruber-be/src/cert/cert.pem'),
+  };
   const app = await NestFactory.create(AppModule);
   const globalPrefix = "api";
   app.setGlobalPrefix(globalPrefix);

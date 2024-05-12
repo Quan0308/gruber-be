@@ -7,5 +7,5 @@ export default new DataSource({
   username: process.env.DB_USERNAME || "postgres",
   password: process.env.DB_PASSWORD || "1",
   database: process.env.DB_DATABASE || "gruber",
-  migrations: [__dirname + "/src/migrations/**/*.ts"],
+  migrations: [__dirname + "/src/migrations/**/*.ts"]
 });

@@ -1,9 +1,10 @@
 import { User } from "@db/entities/user.entity";
-import { UpdateUserGeneralInfoDto } from "@dtos";
-import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import { MakeTransactionDto, UpdateUserGeneralInfoDto } from "@dtos";
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { DriverInfoService } from "../driver_info/driver_info.service";
+import { RoleEnum } from "@types";
 
 @Injectable()
 export class UserService {
@@ -28,18 +29,59 @@ export class UserService {
   async getUsersByParams(params: any) {
     if (params.role == "admin") return [];
     if (params.role == "driver") {
-      const users = await this.userRepository.find({
-        where: params,
-        relations: ["driverInfor"],
-      });
+      const users = await this.userRepository
+        .createQueryBuilder("user")
+        .where("user.role = :role", { role: RoleEnum.DRIVER })
+        .select(["user.id", "user.fullName", "user.phone", "user.avatar"])
+        .leftJoin("user.driverInfor", "driverInfor")
+        .addSelect(["driverInfor.id", "driverInfor.activityStatus", "driverInfor.isValidated"])
+        .leftJoin("driverInfor.driverVehicle", "vehicle")
+        .addSelect(["vehicle.id", "vehicle.plate", "vehicle.description", "vehicle.type"])
+        .getMany();
 
-      return users.map((user) => ({
-        id: user.id,
-        fullName: user.fullName,
-        phone: user.phone,
-        isValidated: user.driverInfor?.isValidated,
-        vehicleId: user.driverInfor?.vehicleId,
-      }));
+      return users.map((user) => {
+        return {
+          id: user.id,
+          fullName: user.fullName,
+          phone: user.phone,
+          avatar: user.avatar,
+          activityStatus: user.driverInfor.activityStatus,
+          isValidated: user.driverInfor.isValidated,
+          vehicle_type: user.driverInfor.driverVehicle?.type,
+          vehicle_plate: user.driverInfor.driverVehicle?.plate,
+          vehicle_description: user.driverInfor.driverVehicle?.description,
+        };
+      });
+    }
+  }
+
+  async getWallets(id: string) {
+    try {
+      const user = await this.userRepository.findOne({ where: { id } });
+      if (!user) {
+        throw new NotFoundException("User not found");
+      }
+      if (user.role != RoleEnum.DRIVER) {
+        throw new BadRequestException("Only driver can have wallets");
+      }
+      return await this.driverInfoService.getWalletsByDriverId(user.id);
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+
+  async makeTransactionWallet(id: string, transaction: MakeTransactionDto) {
+    try {
+      const user = await this.userRepository.findOne({ where: { id }});
+      if (!user) {
+        throw new NotFoundException("User not found");
+      }
+      if (user.role != RoleEnum.DRIVER) {
+        throw new BadRequestException("Only driver can have wallets and withdraw");
+      }
+      return await this.driverInfoService.transact(user.id, transaction);
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
     }
   }
 

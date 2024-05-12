@@ -20,10 +20,10 @@ export class DriverInfor extends BaseEntity {
 
   @Column({ name: "credit_wallet_id", type: "uuid", nullable: false })
   creditWalletId: string;
-
+  
   @Column({ name: "cash_wallet_id", type: "uuid", nullable: false })
   cashWalletId: string;
-
+  
   @Column({
     name: "activity_status",
     type: "enum",
@@ -31,18 +31,20 @@ export class DriverInfor extends BaseEntity {
     default: ActivityStatus.OFFLINE,
   })
   activityStatus: ActivityStatus;
-
+  
   @Column({ name: "is_validated", type: "boolean", default: false })
   isValidated: boolean;
-
+  
   @OneToOne(() => DriverVehicle)
   @JoinColumn({ name: "vehicle_id", referencedColumnName: "id" })
   driverVehicle: DriverVehicle;
-
+  
   @OneToOne(() => Wallet)
+  @JoinColumn({ name: "credit_wallet_id", referencedColumnName: "id" })
   creditWallet: Wallet;
-
+  
   @OneToOne(() => Wallet)
+  @JoinColumn({ name: "cash_wallet_id", referencedColumnName: "id" })
   cashWallet: Wallet;
 
   @OneToOne(() => User)
