@@ -8,3 +8,4 @@ export * from "./wallet-type.enum";
 export * from "./activity-status.enum";
 export * from "./transaction-type.enum";
 export * from "./vehicle-type.enum";
+export * from "./message-booking.enum";

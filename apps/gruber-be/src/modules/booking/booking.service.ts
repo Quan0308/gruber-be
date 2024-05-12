@@ -1,5 +1,5 @@
 import { Booking, DriverVehicle } from "@db/entities";
-import { CreateBookingByPassengerDto, CreateBookingByStaffDto, MakeTransactionDto } from "@dtos";
+import { CreateAssignBookingDriverMessageDto, CreateBookingByPassengerDto, CreateBookingByStaffDto } from "@dtos";
 import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Brackets, Repository } from "typeorm";
@@ -11,14 +11,14 @@ import {
   IBookingRoute,
   ICurrentBookingDriver,
   ICurrentBookingUser,
+  MessageBooking,
   PaymentMethod,
   RoleEnum,
-  TransactionType,
   VehicleTypePrice,
-  WalletType,
 } from "@types";
 import { plainToClass } from "class-transformer";
 import { UserService } from "../user/user.service";
+import { BookingGateway } from "../gateway/booking.gateway";
 
 @Injectable()
 export class BookingService {
@@ -28,7 +28,8 @@ export class BookingService {
     @InjectRepository(DriverVehicle)
     private driverVehicleRepository: Repository<DriverVehicle>,
     private readonly userService: UserService,
-    private readonly bookingRouteService: BookingRouteService
+    private readonly bookingRouteService: BookingRouteService,
+    private readonly bookingGateway: BookingGateway
   ) {}
 
   async createBooking(data: CreateBookingByPassengerDto | CreateBookingByStaffDto) {
@@ -81,7 +82,7 @@ export class BookingService {
       );
       const distance = await this.bookingRouteService.getDistanceOfRoute(route.pickupLocationId, route.destinationId);
       const price = this.getPriceByDistance(distance * 1000);
-      return await this.bookingRepository.save({
+      const newBooking = await this.bookingRepository.save({
         ordered_by_Id: user_id,
         driverId: driver_id,
         name,
@@ -93,6 +94,21 @@ export class BookingService {
         updatedBy: user_id,
         paymentMethod: PaymentMethod.CASH,
       });
+
+      const bookingRoute = await this.bookingRouteService.getBookingRouteDetails(route.id);
+
+      const socketBody: CreateAssignBookingDriverMessageDto = {
+        booking_id: newBooking.id,
+        driver_id: newBooking.driverId,
+        booking_route: {
+          pick_up: bookingRoute.pick_up,
+          destination: bookingRoute.destination,
+        },
+        message: MessageBooking.CREATE_ASSIGN_BOOKING_DRIVER,
+      };
+
+      this.bookingGateway.sendAssignmentMessage(socketBody);
+      return newBooking;
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException();
@@ -124,14 +140,7 @@ export class BookingService {
       targetStatus === BookingStatus.COMPLETED ||
         (BookingStatus.CANCELLED && (booking.completedOn = new Date(new Date().toISOString())));
 
-      const newBooking = await this.bookingRepository.save(booking);
-      if (booking.paymentMethod === PaymentMethod.CARD && (targetStatus === BookingStatus.COMPLETED || targetStatus === BookingStatus.ARRIVED)) {
-        this.userService.makeTransactionWallet(booking.driverId, {amount: Math.ceil(0.7 * booking.price), wallet: WalletType.CASH ,transaction_type: TransactionType.DEPOSIT})
-      }
-      else if (booking.paymentMethod === PaymentMethod.CASH && targetStatus === BookingStatus.COMPLETED) {
-        this.userService.makeTransactionWallet(booking.driverId, {amount: booking.price - Math.ceil(0.7 * booking.price), wallet: WalletType.CREDIT ,transaction_type: TransactionType.WITHDRAW})
-      }        
-      return newBooking;
+      return await this.bookingRepository.save(booking);
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
@@ -149,7 +158,7 @@ export class BookingService {
           ? query.where("booking.driverId = :id", { id: userId })
           : query.where("booking.ordered_by_Id = :id", { id: userId });
       const booking = await query
-      .andWhere("booking.status NOT IN (:...status)", { status: [BookingStatus.CANCELLED, BookingStatus.COMPLETED] })
+        .andWhere("booking.status != :status", { status: BookingStatus.COMPLETED && BookingStatus.CANCELLED })
         .orderBy("booking.createdOn", "DESC")
         .select([
           "booking.id",
