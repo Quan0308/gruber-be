@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Param, Patch, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Param, ParseBoolPipe, Patch, Post, Query } from "@nestjs/common";
 import { BookingService } from "./booking.service";
 import { CreateBookingByPassengerDto, CreateBookingByStaffDto } from "@dtos";
 import { CreateBookingValidationPipe } from "@utils";
@@ -14,12 +14,12 @@ export class BookingController {
   }
 
   @Get(":id")
-  getBookingDetail(@Param("id") id: string){
+  getBookingDetail(@Param("id") id: string) {
     return this.bookingService.getBookingDetail(id, true);
   }
 
   @Get()
-  getAllBookingsByUserId(@Query("current") current: boolean) {
+  getAllBookingsByUserId(@Query("current", new ParseBoolPipe()) current: boolean) {
     return this.bookingService.getAllBookings(current);
   }
 
