@@ -4,9 +4,9 @@ export class ModifyTableDriversInfo1715316736367 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.changeColumn(
       "drivers_info",
-      "driver_idenfication",
+      "driver_identification",
       new TableColumn({
-        name: "driver_idenfication",
+        name: "driver_identification",
         type: "varchar",
         length: "12",
         isNullable: true,
@@ -37,9 +37,9 @@ export class ModifyTableDriversInfo1715316736367 implements MigrationInterface {
     // Reverse the changes made in the up method
     await queryRunner.changeColumn(
       "drivers_info",
-      "driver_idenfication",
+      "driver_identification",
       new TableColumn({
-        name: "driver_idenfication",
+        name: "driver_identification",
         type: "varchar",
         length: "12",
         isNullable: false,
