@@ -56,15 +56,19 @@ It will show tasks that you can run with Nx.
 - [Learn more about Exploring the Project Graph](https://nx.dev/core-features/explore-graph)
 
 ## Create migrations
--  To create a new migration.
-  ```
-  nx run gruber-be:create-migration {migration-name}
-  ```
--  To apply the migrations.
-  ```
-  Unix: bash ./migrate.sh
-  Windows: .\migrate.bat
-  ```
+
+- To create a new migration.
+
+```
+nx run gruber-be:create-migration {migration-name}
+```
+
+- To apply the migrations.
+
+```
+Unix: bash ./migration.sh
+Windows: .\migration.bat
+```
 
 ## Connect with us!
 
