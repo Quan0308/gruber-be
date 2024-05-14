@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table, TableForeignKey } from "typeorm";
+import { MigrationInterface, QueryRunner, Table } from "typeorm";
 
 export class AddTableCardsInfo1714795272795 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -54,14 +54,16 @@ export class AddTableCardsInfo1714795272795 implements MigrationInterface {
             isNullable: false,
           },
         ],
+        foreignKeys: [
+          {
+            name: "FK_CARDS_INFO_OWNER_ID",
+            columnNames: ["owner_id"],
+            referencedColumnNames: ["id"],
+            referencedTableName: "users",
+          },
+        ],
       })
     );
-    const foreignKey = new TableForeignKey({
-      columnNames: ["owner_id"],
-      referencedColumnNames: ["id"],
-      referencedTableName: "users",
-    });
-    await queryRunner.createForeignKey("cards_info", foreignKey);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

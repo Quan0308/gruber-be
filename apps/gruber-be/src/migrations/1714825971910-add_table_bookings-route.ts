@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table, TableForeignKey } from "typeorm";
+import { MigrationInterface, QueryRunner, Table } from "typeorm";
 
 export class AddTableBookingsRoute1714825971910 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -22,20 +22,22 @@ export class AddTableBookingsRoute1714825971910 implements MigrationInterface {
             isNullable: false,
           },
         ],
+        foreignKeys: [
+          {
+            name: "FK_BOOKINGS_ROUTE_PICKUP_LOCATION_ID",
+            columnNames: ["pickup_location_id"],
+            referencedColumnNames: ["id"],
+            referencedTableName: "location_records",
+          },
+          {
+            name: "FK_BOOKINGS_ROUTE_DESTINATION_ID",
+            columnNames: ["destination_id"],
+            referencedColumnNames: ["id"],
+            referencedTableName: "location_records",
+          },
+        ],
       })
     );
-    const foreignKeyPickup = new TableForeignKey({
-      columnNames: ["pickup_location_id"],
-      referencedColumnNames: ["id"],
-      referencedTableName: "location_records",
-    });
-    const foreignKeyDestination = new TableForeignKey({
-      columnNames: ["destination_id"],
-      referencedColumnNames: ["id"],
-      referencedTableName: "location_records",
-    });
-    await queryRunner.createForeignKey("bookings_route", foreignKeyPickup);
-    await queryRunner.createForeignKey("bookings_route", foreignKeyDestination);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

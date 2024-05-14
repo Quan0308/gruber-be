@@ -118,44 +118,46 @@ export class AddTableBookings1714827900131 implements MigrationInterface {
             default: "'pending'",
           },
         ],
+        foreignKeys: [
+          {
+            name: "FK_BOOKINGS_BOOKING_ROUTE_ID",
+            columnNames: ["booking_route_id"],
+            referencedColumnNames: ["id"],
+            referencedTableName: "bookings_route",
+          },
+          {
+            name: "FK_BOOKINGS_DRIVER_ID",
+            columnNames: ["driver_id"],
+            referencedColumnNames: ["id"],
+            referencedTableName: "users",
+          },
+          {
+            name: "FK_BOOKINGS_ORDERED_BY_ID",
+            columnNames: ["ordered_by_id"],
+            referencedColumnNames: ["id"],
+            referencedTableName: "users",
+          },
+          {
+            name: "FK_BOOKINGS_CREATED_BY",
+            columnNames: ["created_by"],
+            referencedColumnNames: ["id"],
+            referencedTableName: "users",
+          },
+          {
+            name: "FK_BOOKINGS_UPDATED_BY",
+            columnNames: ["updated_by"],
+            referencedColumnNames: ["id"],
+            referencedTableName: "users",
+          },
+          {
+            name: "FK_BOOKINGS_TRANSACTION_ID",
+            columnNames: ["transaction_id"],
+            referencedColumnNames: ["id"],
+            referencedTableName: "transactions",
+          },
+        ],
       })
     );
-    const foreignBookingRouteId = new TableForeignKey({
-      columnNames: ["booking_route_id"],
-      referencedColumnNames: ["id"],
-      referencedTableName: "bookings_route",
-    });
-    const foreignDriverId = new TableForeignKey({
-      columnNames: ["driver_id"],
-      referencedColumnNames: ["id"],
-      referencedTableName: "users",
-    });
-    const foreignOrderedById = new TableForeignKey({
-      columnNames: ["ordered_by_id"],
-      referencedColumnNames: ["id"],
-      referencedTableName: "users",
-    });
-    const foreignCreatedBy = new TableForeignKey({
-      columnNames: ["created_by"],
-      referencedColumnNames: ["id"],
-      referencedTableName: "users",
-    });
-    const foreignUpdatedBy = new TableForeignKey({
-      columnNames: ["updated_by"],
-      referencedColumnNames: ["id"],
-      referencedTableName: "users",
-    });
-    const foreignTransactionId = new TableForeignKey({
-      columnNames: ["transaction_id"],
-      referencedColumnNames: ["id"],
-      referencedTableName: "transactions",
-    });
-    await queryRunner.createForeignKey("bookings", foreignBookingRouteId);
-    await queryRunner.createForeignKey("bookings", foreignDriverId);
-    await queryRunner.createForeignKey("bookings", foreignOrderedById);
-    await queryRunner.createForeignKey("bookings", foreignCreatedBy);
-    await queryRunner.createForeignKey("bookings", foreignUpdatedBy);
-    await queryRunner.createForeignKey("bookings", foreignTransactionId);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
