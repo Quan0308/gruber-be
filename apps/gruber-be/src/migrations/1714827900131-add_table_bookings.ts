@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table, TableForeignKey } from "typeorm";
+import { MigrationInterface, QueryRunner, Table } from "typeorm";
 
 export class AddTableBookings1714827900131 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -10,19 +10,26 @@ export class AddTableBookings1714827900131 implements MigrationInterface {
             name: "id",
             type: "uuid",
             isPrimary: true,
-          },
-          {
-            name: "booking_route_id",
-            type: "uuid",
-            isNullable: false,
+            isGenerated: true,
+            generationStrategy: "uuid",
           },
           {
             name: "driver_id",
             type: "uuid",
-            isNullable: false,
+            isNullable: true,
           },
           {
             name: "ordered_by_id",
+            type: "uuid",
+            isNullable: false,
+          },
+          {
+            name: "pickup_location_id",
+            type: "uuid",
+            isNullable: false,
+          },
+          {
+            name: "destination_location_id",
             type: "uuid",
             isNullable: false,
           },
@@ -55,6 +62,7 @@ export class AddTableBookings1714827900131 implements MigrationInterface {
             name: "updated_on",
             type: "timestamp",
             default: "CURRENT_TIMESTAMP",
+            onUpdate: "CURRENT_TIMESTAMP",
             isNullable: false,
           },
           {
@@ -98,19 +106,6 @@ export class AddTableBookings1714827900131 implements MigrationInterface {
             default: "null",
           },
           {
-            name: "vehicle_type",
-            type: "varchar",
-            length: "255",
-            isNullable: false,
-            default: "''",
-          },
-          {
-            name: "transaction_id",
-            type: "uuid",
-            isNullable: true,
-            default: null,
-          },
-          {
             name: "status",
             type: "enum",
             enum: ["pending", "accepted", "picked_up", "in_progress", "arrived", "completed", "rejected", "cancelled"],
@@ -119,12 +114,6 @@ export class AddTableBookings1714827900131 implements MigrationInterface {
           },
         ],
         foreignKeys: [
-          {
-            name: "FK_BOOKINGS_BOOKING_ROUTE_ID",
-            columnNames: ["booking_route_id"],
-            referencedColumnNames: ["id"],
-            referencedTableName: "bookings_route",
-          },
           {
             name: "FK_BOOKINGS_DRIVER_ID",
             columnNames: ["driver_id"],
@@ -138,6 +127,18 @@ export class AddTableBookings1714827900131 implements MigrationInterface {
             referencedTableName: "users",
           },
           {
+            name: "FK_BOOKINGS_PICKUP_LOCATION_ID",
+            columnNames: ["pickup_location_id"],
+            referencedColumnNames: ["id"],
+            referencedTableName: "location_records",
+          },
+          {
+            name: "FK_BOOKINGS_DESTINATION_LOCATION_ID",
+            columnNames: ["destination_location_id"],
+            referencedColumnNames: ["id"],
+            referencedTableName: "location_records",
+          },
+          {
             name: "FK_BOOKINGS_CREATED_BY",
             columnNames: ["created_by"],
             referencedColumnNames: ["id"],
@@ -148,12 +149,6 @@ export class AddTableBookings1714827900131 implements MigrationInterface {
             columnNames: ["updated_by"],
             referencedColumnNames: ["id"],
             referencedTableName: "users",
-          },
-          {
-            name: "FK_BOOKINGS_TRANSACTION_ID",
-            columnNames: ["transaction_id"],
-            referencedColumnNames: ["id"],
-            referencedTableName: "transactions",
           },
         ],
       })

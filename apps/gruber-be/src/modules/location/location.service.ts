@@ -19,7 +19,7 @@ export class LocationService {
     const existedLocationCoordinate = await this.getLocationByUnit(data.lng, data.lat, 0.00001);
     return existedLocationCoordinate
       ? existedLocationCoordinate
-      : await this.locationRecordRepository.save({
+      : this.locationRecordRepository.save({
           formattedAddress: data?.formattedAddress,
           name: data?.name,
           coordinate: pointObject,

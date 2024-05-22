@@ -3,8 +3,10 @@ import { ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 
 import * as dbEntities from "./entities";
+import * as dbSubscribers from "./subscribers";
 
 const entities = (Object.keys(dbEntities) as Array<keyof typeof dbEntities>).map((key) => dbEntities[key]);
+const subscribers = (Object.keys(dbSubscribers) as Array<keyof typeof dbSubscribers>).map((key) => dbSubscribers[key]);
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -16,7 +18,8 @@ const entities = (Object.keys(dbEntities) as Array<keyof typeof dbEntities>).map
         password: configService.get("DB_PASSWORD"),
         database: configService.get("DB_DATABASE"),
         entities,
-        synchronize: true,
+        subscribers,
+        synchronize: false,
       }),
       inject: [ConfigService],
     }),

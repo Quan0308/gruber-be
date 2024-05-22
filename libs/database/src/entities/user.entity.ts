@@ -8,11 +8,13 @@ import {
   OneToMany,
   OneToOne,
   JoinColumn,
+  Geometry,
 } from "typeorm";
 import { RoleEnum } from "@types";
 import { Booking } from "./booking.entity";
 import { CardInfo } from "./card_info.entity";
 import { DriverInfor } from "./drivers_info.entity";
+import { Transaction } from "./transaction.entity";
 
 @Entity({ name: "users" })
 export class User extends BaseEntity {
@@ -46,15 +48,28 @@ export class User extends BaseEntity {
   })
   updatedOn: Date;
 
+  @Column({
+    name: "current_location",
+    type: "geometry",
+    nullable: true,
+    spatialFeatureType: "Point",
+    srid: 4326,
+    default: null,
+  })
+  currentLocation: Geometry;
+
   @OneToOne(() => CardInfo)
-  cardInfo: CardInfo;
+  readonly cardInfo: CardInfo;
 
   @OneToMany(() => Booking, (booking) => booking.driver)
-  bookings: Booking[];
+  readonly bookings: Booking[];
 
   @OneToMany(() => Booking, (booking) => booking.order)
-  orders: Booking[];
+  readonly orders: Booking[];
 
   @OneToOne(() => DriverInfor, (driverInfor) => driverInfor.user)
-  driverInfor: DriverInfor;
+  readonly driverInfor: DriverInfor;
+
+  @OneToMany(() => Transaction, (transaction) => transaction.owner)
+  readonly transactions: Transaction[];
 }

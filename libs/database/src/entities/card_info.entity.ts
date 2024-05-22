@@ -29,5 +29,5 @@ export class CardInfo extends BaseEntity {
 
   @OneToOne(() => User)
   @JoinColumn({ name: "owner_id", referencedColumnName: "id" })
-  owner: User;
+  readonly owner: User;
 }

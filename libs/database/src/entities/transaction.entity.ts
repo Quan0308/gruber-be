@@ -1,6 +1,7 @@
 import { TransactionStatus, TransactionType } from "@types";
-import { BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Wallet } from "./wallet.entity";
+import { User } from "./user.entity";
 
 @Entity({ name: "transactions" })
 export class Transaction extends BaseEntity {
@@ -21,9 +22,22 @@ export class Transaction extends BaseEntity {
   })
   transactionDate: Date;
 
-  @Column({ name: "sender", type: "varchar", length: "20", nullable: false })
-  sender: string;
+  @Column({
+    name: "status",
+    type: "enum",
+    enum: TransactionStatus,
+    nullable: false,
+    default: TransactionStatus.PENDING,
+  })
+  status: TransactionStatus;
 
-  @Column({ name: "receiver", type: "varchar", length: "20", nullable: false })
-  receiver: string;
+  @Column({ name: "type", type: "enum", enum: TransactionType, nullable: false, default: TransactionType.DEPOSIT })
+  type: TransactionType;
+
+  @Column({ name: "description", type: "varchar", length: 255, nullable: true, default: null })
+  desctiption: string;
+
+  @ManyToOne(() => User, (user) => user.transactions)
+  @JoinColumn({ name: "owner_id", referencedColumnName: "id" })
+  readonly owner: User;
 }

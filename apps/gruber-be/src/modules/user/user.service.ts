@@ -1,8 +1,8 @@
 import { User } from "@db/entities/user.entity";
-import { MakeTransactionDto, UpdateUserGeneralInfoDto } from "@dtos";
+import { MakeTransactionDto, UpdateCurrentLocation, UpdateUserGeneralInfoDto } from "@dtos";
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Point, Repository } from "typeorm";
 import { DriverInfoService } from "../driver_info/driver_info.service";
 import { RoleEnum } from "@types";
 
@@ -13,8 +13,30 @@ export class UserService {
     private userRepository: Repository<User>,
     private readonly driverInfoService: DriverInfoService
   ) {}
+
   async getUserById(id: string) {
-    return await this.userRepository.findOne({ where: { id } });
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+    return user;
+  }
+
+  async updateCurrentLocation(position: UpdateCurrentLocation, id: string) {
+    try {
+      const user = await this.userRepository.findOne({ where: { id } });
+      if (!user) {
+        throw new NotFoundException("User not found");
+      }
+      const pointObject: Point = {
+        type: "Point",
+        coordinates: [position.lng, position.lat],
+      };
+      user.currentLocation = pointObject;
+      return this.userRepository.save(user);
+    } catch (ex) {
+      throw new InternalServerErrorException(ex.message);
+    }
   }
 
   async getDriverVehicleByUserId(userId: string) {
@@ -40,17 +62,17 @@ export class UserService {
         .getMany();
 
       return users.map((user) => {
-        return {
-          id: user.id,
-          fullName: user.fullName,
-          phone: user.phone,
-          avatar: user.avatar,
-          activityStatus: user.driverInfor.activityStatus,
-          isValidated: user.driverInfor.isValidated,
-          vehicle_type: user.driverInfor.driverVehicle?.type,
-          vehicle_plate: user.driverInfor.driverVehicle?.plate,
-          vehicle_description: user.driverInfor.driverVehicle?.description,
-        };
+        // return {
+        //   id: user.id,
+        //   fullName: user.fullName,
+        //   phone: user.phone,
+        //   avatar: user.avatar,
+        //   activityStatus: user.driverInfor.activityStatus,
+        //   isValidated: user.driverInfor.isValidated,
+        //   vehicle_type: user.driverInfor.driverVehicle?.type,
+        //   vehicle_plate: user.driverInfor.driverVehicle?.plate,
+        //   vehicle_description: user.driverInfor.driverVehicle?.description,
+        // };
       });
     }
   }
@@ -72,7 +94,7 @@ export class UserService {
 
   async makeTransactionWallet(id: string, transaction: MakeTransactionDto) {
     try {
-      const user = await this.userRepository.findOne({ where: { id }});
+      const user = await this.userRepository.findOne({ where: { id } });
       if (!user) {
         throw new NotFoundException("User not found");
       }

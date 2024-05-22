@@ -10,6 +10,8 @@ export class AddTableUsers1714062528722 implements MigrationInterface {
             name: "id",
             type: "uuid",
             isPrimary: true,
+            isGenerated: true,
+            generationStrategy: "uuid",
           },
           {
             name: "full_name",
@@ -50,6 +52,13 @@ export class AddTableUsers1714062528722 implements MigrationInterface {
             name: "updated_on",
             type: "timestamp",
             default: "CURRENT_TIMESTAMP",
+            onUpdate: "CURRENT_TIMESTAMP",
+          },
+          {
+            name: "current_location",
+            type: "geometry",
+            isNullable: true,
+            default: null,
           },
         ],
       })

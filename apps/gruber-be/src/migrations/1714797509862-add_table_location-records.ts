@@ -11,6 +11,8 @@ export class AddTableLocationRecords1714797509862 implements MigrationInterface 
             name: "id",
             type: "uuid",
             isPrimary: true,
+            isGenerated: true,
+            generationStrategy: "uuid",
           },
           {
             name: "formatted_address",
@@ -28,6 +30,11 @@ export class AddTableLocationRecords1714797509862 implements MigrationInterface 
             name: "coordinate",
             type: "geometry",
             isNullable: false,
+          },
+          {
+            name: "key",
+            type: "text",
+            isNullable: true,
           },
         ],
       })

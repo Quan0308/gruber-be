@@ -13,20 +13,23 @@ import {
 } from "typeorm";
 
 import { User } from "./user.entity";
-import { BookingRoute } from "./booking_route.entity";
+import { LocationRecord } from "./location_record.entity";
 @Entity({ name: "bookings" })
 export class Booking extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ name: "booking_route_id", type: "uuid", nullable: false })
-  bookingRouteId: string;
+  @Column({ name: "pickup_location_id", type: "uuid", nullable: false })
+  pickupLocationId: string;
+
+  @Column({ name: "destination_location_id", type: "uuid", nullable: false })
+  destinationLocationId: string;
 
   @Column({ name: "driver_id", type: "uuid", nullable: true, default: null })
   driverId: string;
 
   @Column({ name: "ordered_by_id", type: "uuid", nullable: false })
-  ordered_by_Id: string;
+  orderedById: string;
 
   @Column({ name: "name", type: "varchar", length: 255, nullable: true, default: null })
   name: string;
@@ -70,28 +73,32 @@ export class Booking extends BaseEntity {
   @Column({ name: "payment_method", type: "enum", enum: PaymentMethod, nullable: false, default: PaymentMethod.CARD })
   paymentMethod: PaymentMethod;
 
-  @Column({ name: "vehicle_type", type: "varchar", length: 255, nullable: false, default: "" })
-  vehicleType: string;
-
   @Column({ name: "status", type: "enum", enum: BookingStatus, nullable: false, default: BookingStatus.PENDING })
   status: BookingStatus;
 
-  @OneToOne(() => BookingRoute)
-  @JoinColumn({ name: "booking_route_id" })
-  route: BookingRoute;
+  @OneToOne(() => LocationRecord)
+  @JoinColumn({ name: "pickup_location_id", referencedColumnName: "id" })
+  readonly pickupLocation: LocationRecord;
+
+  @OneToOne(() => LocationRecord)
+  @JoinColumn({ name: "destination_location_id", referencedColumnName: "id" })
+  readonly destinationLocation: LocationRecord;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: "driver_id" })
-  driver: User;
+  @JoinColumn({ name: "driver_id", referencedColumnName: "id" })
+  readonly driver: User;
 
-  @ManyToOne(() => User)
-  order: User;
+  @ManyToOne(() => User, (user) => user.orders)
+  @JoinColumn({ name: "ordered_by_id", referencedColumnName: "id" })
+  readonly order: User;
 
-  @ManyToOne(() => User)
-  createdByUser: User;
+  @ManyToOne(() => User, (user) => user.bookings)
+  @JoinColumn({ name: "created_by", referencedColumnName: "id" })
+  readonly createdByUser: User;
 
-  @ManyToOne(() => User)
-  updatedByUser: User;
+  @ManyToOne(() => User, (user) => user.bookings)
+  @JoinColumn({ name: "updated_by", referencedColumnName: "id" })
+  readonly updatedByUser: User;
 
   @BeforeUpdate()
   async checkDriverRole() {

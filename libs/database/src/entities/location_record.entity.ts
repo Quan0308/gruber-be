@@ -13,4 +13,7 @@ export class LocationRecord extends BaseEntity {
 
   @Column({ name: "coordinate", type: "geometry", nullable: false })
   coordinate: Geometry;
+
+  @Column({ name: "key", type: "text", nullable: true, default: null })
+  key: string;
 }

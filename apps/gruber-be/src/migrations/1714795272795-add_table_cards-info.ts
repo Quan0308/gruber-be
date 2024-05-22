@@ -10,6 +10,8 @@ export class AddTableCardsInfo1714795272795 implements MigrationInterface {
             name: "id",
             type: "uuid",
             isPrimary: true,
+            isGenerated: true,
+            generationStrategy: "uuid",
           },
           {
             name: "owner_id",

@@ -1,10 +1,11 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from "@nestjs/common";
+import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from "@nestjs/common";
 import { FirebaseAdminService, MailService } from "@shared-modules";
 import { LoginDto, RegisterDto } from "@dtos";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "@db/entities";
 import { Repository } from "typeorm";
 import { DriverInfoService } from "../driver_info/driver_info.service";
+import { FirebaseErrorCodeEnum, RoleEnum } from "@types";
 @Injectable()
 export class AuthService {
   constructor(
@@ -23,16 +24,17 @@ export class AuthService {
         data.role
       );
       const driver = await this.userRepository.save({ firebaseUid: userRecord.uid, role: data.role });
-      if (data.role === "driver") {
+      if (data.role === RoleEnum.DRIVER) {
         await this.driverInfoService.createDriverInfo(driver.id);
       }
-      return await this.mailService.sendUserConfirmation(data.email, data.email, emailVerificationLink);
+      return this.mailService.sendUserConfirmation(data.email, data.email, emailVerificationLink);
     } catch (ex) {
+      console.log(ex);
       switch (ex.response?.error?.message) {
         case "EMAIL_EXISTS":
           throw new BadRequestException("Email already exists");
       }
-      throw new InternalServerErrorException(ex.response.error?.message);
+      throw new InternalServerErrorException(ex.response?.error?.message);
     }
   }
 
@@ -56,6 +58,11 @@ export class AuthService {
   }
 
   async verifyFirebaseToken(token: string) {
-    return await this.firebaseAdminService.verifyToken(token);
+    try {
+      return this.firebaseAdminService.verifyToken(token);
+    } catch (ex) {
+      if (ex?.code === FirebaseErrorCodeEnum.TOKEN_EXPIRED) throw new UnauthorizedException(ex.response.error.message);
+      throw new InternalServerErrorException(ex.message);
+    }
   }
 }

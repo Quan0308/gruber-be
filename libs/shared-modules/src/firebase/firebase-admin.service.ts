@@ -40,19 +40,12 @@ export class FirebaseAdminService {
   }
 
   async verifyToken(token: string) {
-    try {
-      return await admin
-        .auth()
-        .verifyIdToken(token)
-        .then((claims) => {
-          return claims?.role;
-        });
-    } catch (error) {
-      if (error.code === FirebaseErrorCodeEnum.TOKEN_EXPIRED) {
-        return new UnauthorizedException(error.message);
-      }
-      throw error;
-    }
+    return admin
+      .auth()
+      .verifyIdToken(token)
+      .then((claims) => {
+        return claims?.role;
+      });
   }
 
   async checkVerifiedEmail(uid: string) {

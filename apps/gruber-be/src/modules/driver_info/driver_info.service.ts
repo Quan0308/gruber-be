@@ -6,7 +6,6 @@ import { WalletService } from "../wallet/wallet.service";
 import { TransactionType, WalletType } from "@types";
 import { NotFoundException, InternalServerErrorException } from "@nestjs/common";
 
-import { VehicleService } from "../vehicle/vehicle.service";
 import { CreateVehicleDto } from "@dtos";
 import { MakeTransactionDto } from "@dtos";
 
@@ -15,8 +14,7 @@ export class DriverInfoService {
   constructor(
     @InjectRepository(DriverInfor)
     private driverInforRepository: Repository<DriverInfor>,
-    private readonly walletService: WalletService,
-    private readonly vehicleService: VehicleService
+    private readonly walletService: WalletService
   ) {}
 
   async createDriverInfo(driver_id: string) {
@@ -34,9 +32,9 @@ export class DriverInfoService {
 
   async getWalletsByDriverId(driverId: string) {
     try {
-      const driverInfo = await this.driverInforRepository.findOne({ 
+      const driverInfo = await this.driverInforRepository.findOne({
         where: { driverId },
-        relations: ['creditWallet', 'cashWallet'],
+        relations: ["creditWallet", "cashWallet"],
       });
       if (!driverInfo) {
         throw new NotFoundException("Driver not found");
@@ -50,34 +48,34 @@ export class DriverInfoService {
     }
   }
 
-  async updateDriverVehicle(driver_id: string) {
-    const [driver, vehicle] = await Promise.all([
-      this.driverInforRepository.findOne({ where: { driverId: driver_id } }),
-      this.vehicleService.getVehicleByOwnerId(driver_id),
-    ]);
+  // async updateDriverVehicle(driver_id: string) {
+  //   const [driver, vehicle] = await Promise.all([
+  //     this.driverInforRepository.findOne({ where: { driverId: driver_id } }),
+  //     this.vehicleService.getVehicleByOwnerId(driver_id),
+  //   ]);
 
-    if (!driver || !vehicle) {
-      throw new NotFoundException(!driver ? "Driver not found" : "Vehicle not found");
-    }
+  //   if (!driver || !vehicle) {
+  //     throw new NotFoundException(!driver ? "Driver not found" : "Vehicle not found");
+  //   }
 
-    return this.driverInforRepository.save({ ...driver, vehicleId: vehicle.id });
-  }
+  //   return this.driverInforRepository.save({ ...driver, vehicleId: vehicle.id });
+  // }
 
-  async createDriverVehicle(data: CreateVehicleDto, driver_id: string) {
-    const driver = await this.driverInforRepository.findOne({ where: { driverId: driver_id } });
-    if (!driver) {
-      throw new NotFoundException("Driver not found");
-    }
-    return await this.vehicleService.createVehicle({ ...data, ownerId: driver_id });
-  }
+  // async createDriverVehicle(data: CreateVehicleDto, driver_id: string) {
+  //   const driver = await this.driverInforRepository.findOne({ where: { driverId: driver_id } });
+  //   if (!driver) {
+  //     throw new NotFoundException("Driver not found");
+  //   }
+  //   return await this.vehicleService.createVehicle({ ...data, ownerId: driver_id });
+  // }
 
-  async getDriverVehicleByDriverId(driver_id: string) {
-    const driver = await this.driverInforRepository.findOne({
-      where: { driverId: driver_id },
-      relations: { driverVehicle: true },
-    });
-    return driver?.driverVehicle;
-  }
+  // async getDriverVehicleByDriverId(driver_id: string) {
+  //   const driver = await this.driverInforRepository.findOne({
+  //     where: { driverId: driver_id },
+  //     relations: { driverVehicle: true },
+  //   });
+  //   return driver?.driverVehicle;
+  // }
 
   async validateDriver(driverId: string) {
     try {
@@ -99,7 +97,8 @@ export class DriverInfoService {
         throw new NotFoundException("Driver not found");
       }
       const walletId = transaction.wallet === WalletType.CASH ? driver.cashWalletId : driver.creditWalletId;
-      if (transaction.transaction_type == TransactionType.WITHDRAW) await this.walletService.withdraw(walletId, transaction.amount);
+      if (transaction.transaction_type == TransactionType.WITHDRAW)
+        await this.walletService.withdraw(walletId, transaction.amount);
       else await this.walletService.deposit(walletId, transaction.amount);
       const wallets = await this.getWalletsByDriverId(driverId);
       return wallets;

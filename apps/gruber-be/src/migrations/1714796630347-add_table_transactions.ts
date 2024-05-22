@@ -10,6 +10,8 @@ export class AddTableTransactions1714796630347 implements MigrationInterface {
             name: "id",
             type: "uuid",
             isPrimary: true,
+            isGenerated: true,
+            generationStrategy: "uuid",
           },
           {
             name: "owner_id",

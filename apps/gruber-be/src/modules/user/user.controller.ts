@@ -16,15 +16,15 @@ export class UserController {
   ) {}
 
   // allow role driver or passenger
-  @Get(":id/bookings")
-  async getAllBookingsByUserId(@Param("id") id: string) {
-    return await this.bookingService.getAllBookingsByUserId(id);
-  }
+  // @Get(":id/bookings")
+  // async getAllBookingsByUserId(@Param("id") id: string) {
+  //   return await this.bookingService.getAllBookingsByUserId(id);
+  // }
 
-  @Get(":id/bookings/:bookingId")
-  async getBookingById(@Param("id") id: string, @Param("bookingId") bookingId: string) {
-    return await this.bookingService.getBookingDetail(bookingId);
-  }
+  // @Get(":id/bookings/:bookingId")
+  // async getBookingById(@Param("id") id: string, @Param("bookingId") bookingId: string) {
+  //   return await this.bookingService.getBookingDetail(bookingId);
+  // }
 
   @Get(":id/current-booking")
   async getCurrentBooking(@Param("id") id: string) {
@@ -66,14 +66,14 @@ export class UserController {
     return await this.userService.validateDriver(id);
   }
 
-  @Post(":id/vehicle")
-  async createDriverVehicle(@Param("id") id: string, @Body() data: CreateVehicleDto) {
-    await this.driverInfoService.createDriverVehicle(data, id);
-    return await this.driverInfoService.updateDriverVehicle(id);
-  }
+  // @Post(":id/vehicle")
+  // async createDriverVehicle(@Param("id") id: string, @Body() data: CreateVehicleDto) {
+  //   await this.driverInfoService.createDriverVehicle(data, id);
+  //   return await this.driverInfoService.updateDriverVehicle(id);
+  // }
 
-  @Get(":id/vehicle")
-  async getDriverVehicle(@Param("id") id: string) {
-    return await this.driverInfoService.getDriverVehicleByDriverId(id);
-  }
+  // @Get(":id/vehicle")
+  // async getDriverVehicle(@Param("id") id: string) {
+  //   return await this.driverInfoService.getDriverVehicleByDriverId(id);
+  // }
 }
