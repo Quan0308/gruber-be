@@ -23,10 +23,10 @@ export class BookingController {
     return this.bookingService.getPriceByDistance(distance);
   }
 
-  // @Get(":id")
-  // getBookingDetail(@Param("id") id: string) {
-  //   return this.bookingService.getBookingDetail(id, true);
-  // }
+  @Get(":id")
+  getBookingDetail(@Param("id") id: string) {
+    return this.bookingService.getBookingDetail(id, true);
+  }
 
   @Get()
   getAllBookingsByUserId(@Query("current", new ParseBoolPipe()) current: boolean) {
@@ -57,13 +57,13 @@ export class BookingController {
     return await this.bookingService.updateBookingStatus(id, status, updatedById);
   }
 
-  // @Patch(":id/driver")
-  // @HttpCode(200)
-  // async updateBookingDriver(
-  //   @Param("id") id: string,
-  //   @Body("driver_id") driverId: string,
-  //   @Body("updated_by_id") updatedById: string
-  // ) {
-  //   return await this.bookingService.updateBookingDriver(id, driverId, updatedById);
-  // }
+  @Patch(":id/driver")
+  @HttpCode(200)
+  async updateBookingDriver(
+    @Param("id") id: string,
+    @Body("driver_id") driverId: string,
+    @Body("updated_by_id") updatedById: string
+  ) {
+    return await this.bookingService.updateBookingDriver(id, driverId, updatedById);
+  }
 }

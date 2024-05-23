@@ -55,24 +55,29 @@ export class UserService {
         .createQueryBuilder("user")
         .where("user.role = :role", { role: RoleEnum.DRIVER })
         .select(["user.id", "user.fullName", "user.phone", "user.avatar"])
-        .leftJoin("user.driverInfor", "driverInfor")
-        .addSelect(["driverInfor.id", "driverInfor.activityStatus", "driverInfor.isValidated"])
-        .leftJoin("driverInfor.driverVehicle", "vehicle")
-        .addSelect(["vehicle.id", "vehicle.plate", "vehicle.description", "vehicle.type"])
+        .leftJoinAndSelect("user.driverInfor", "driverInfor")
+        // .addSelect([
+        //   "driverInfor.id",
+        //   "driverInfor.activityStatus",
+        //   "driverInfor.isValidated",
+        //   "driverInfor.VehicleType",
+        //   "driverInfor.VehiclePlate",
+        //   "driverInfor.VehicleDescription",
+        // ])
         .getMany();
 
       return users.map((user) => {
-        // return {
-        //   id: user.id,
-        //   fullName: user.fullName,
-        //   phone: user.phone,
-        //   avatar: user.avatar,
-        //   activityStatus: user.driverInfor.activityStatus,
-        //   isValidated: user.driverInfor.isValidated,
-        //   vehicle_type: user.driverInfor.driverVehicle?.type,
-        //   vehicle_plate: user.driverInfor.driverVehicle?.plate,
-        //   vehicle_description: user.driverInfor.driverVehicle?.description,
-        // };
+        return {
+          id: user.id,
+          fullName: user.fullName,
+          phone: user.phone,
+          avatar: user.avatar,
+          activityStatus: user?.driverInfor.activityStatus,
+          isValidated: user?.driverInfor.isValidated,
+          vehicle_type: user?.driverInfor.vehicleType,
+          vehicle_plate: user?.driverInfor.vehiclePlate,
+          vehicle_description: user?.driverInfor.vehicleDescription,
+        };
       });
     }
   }

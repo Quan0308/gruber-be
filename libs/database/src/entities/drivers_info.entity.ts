@@ -51,8 +51,4 @@ export class DriverInfor extends BaseEntity {
   @OneToOne(() => User)
   @JoinColumn({ name: "driver_id", referencedColumnName: "id" })
   readonly user: User;
-
-  @OneToOne(() => DriverInfor)
-  @JoinColumn({ name: "driver_id", referencedColumnName: "id" })
-  readonly driverInfo: DriverInfor;
 }

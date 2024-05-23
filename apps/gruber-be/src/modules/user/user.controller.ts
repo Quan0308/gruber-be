@@ -66,14 +66,13 @@ export class UserController {
     return await this.userService.validateDriver(id);
   }
 
-  // @Post(":id/vehicle")
-  // async createDriverVehicle(@Param("id") id: string, @Body() data: CreateVehicleDto) {
-  //   await this.driverInfoService.createDriverVehicle(data, id);
-  //   return await this.driverInfoService.updateDriverVehicle(id);
-  // }
+  @Post(":id/vehicle")
+  async createDriverVehicle(@Param("id") id: string, @Body() data: CreateVehicleDto) {
+    return this.driverInfoService.updateDriverVehicle(id, data);
+  }
 
-  // @Get(":id/vehicle")
-  // async getDriverVehicle(@Param("id") id: string) {
-  //   return await this.driverInfoService.getDriverVehicleByDriverId(id);
-  // }
+  @Get(":id/vehicle")
+  async getDriverVehicle(@Param("id") id: string) {
+    return await this.driverInfoService.getDriverVehicleByDriverId(id);
+  }
 }

@@ -48,18 +48,16 @@ export class DriverInfoService {
     }
   }
 
-  // async updateDriverVehicle(driver_id: string) {
-  //   const [driver, vehicle] = await Promise.all([
-  //     this.driverInforRepository.findOne({ where: { driverId: driver_id } }),
-  //     this.vehicleService.getVehicleByOwnerId(driver_id),
-  //   ]);
+  async updateDriverVehicle(driver_id: string, data: CreateVehicleDto) {
+    const driver = await this.driverInforRepository.findOne({ where: { driverId: driver_id } });
+    if (!driver) throw new NotFoundException("Driver not found");
+    driver.vehicleType = data.type;
+    driver.vehicleDescription = data.description;
+    driver.vehiclePlate = data.plate;
+    !driver.isValidated && (driver.isValidated = true);
 
-  //   if (!driver || !vehicle) {
-  //     throw new NotFoundException(!driver ? "Driver not found" : "Vehicle not found");
-  //   }
-
-  //   return this.driverInforRepository.save({ ...driver, vehicleId: vehicle.id });
-  // }
+    return this.driverInforRepository.save(driver);
+  }
 
   // async createDriverVehicle(data: CreateVehicleDto, driver_id: string) {
   //   const driver = await this.driverInforRepository.findOne({ where: { driverId: driver_id } });
@@ -69,13 +67,12 @@ export class DriverInfoService {
   //   return await this.vehicleService.createVehicle({ ...data, ownerId: driver_id });
   // }
 
-  // async getDriverVehicleByDriverId(driver_id: string) {
-  //   const driver = await this.driverInforRepository.findOne({
-  //     where: { driverId: driver_id },
-  //     relations: { driverVehicle: true },
-  //   });
-  //   return driver?.driverVehicle;
-  // }
+  async getDriverVehicleByDriverId(driver_id: string) {
+    const driver = await this.driverInforRepository.findOne({
+      where: { driverId: driver_id },
+    });
+    return driver?.vehicleType;
+  }
 
   async validateDriver(driverId: string) {
     try {

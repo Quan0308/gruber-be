@@ -8,7 +8,7 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Brackets, Repository } from "typeorm";
+import { Brackets, Point, Repository } from "typeorm";
 import {
   BookingStatus,
   IAllBookings,
@@ -41,12 +41,23 @@ export class BookingService {
     try {
       const pickUpLocation = await this.locationService.createLocation(data.booking_route.pick_up);
       const destinationLocation = await this.locationService.createLocation(data.booking_route.destination);
+      const startPoint: Point = {
+        type: "Point",
+        coordinates: [data.booking_route.pick_up.lng, data.booking_route.pick_up.lat],
+      };
+      const endPoint: Point = {
+        type: "Point",
+        coordinates: [data.booking_route.destination.lng, data.booking_route.destination.lat],
+      };
+      const distance = this.locationService.calculateDistanceBetweenTwoLocations(startPoint, endPoint);
+
       return this.bookingRepository.save({
         orderedById: data.user_id,
         vehicleType: data.vehicle_type,
         pickupLocationId: pickUpLocation.id,
         destinationLocationId: destinationLocation.id,
         status: BookingStatus.PENDING,
+        price: this.getPriceByDistance(distance)[data.vehicle_type],
       });
     } catch (error) {
       throw new InternalServerErrorException(error.message);
@@ -55,9 +66,30 @@ export class BookingService {
 
   async createBookingByStaff(data: CreateBookingByStaffDto) {
     try {
+      const pickUpLocation = await this.locationService.getLocationById(data.booking_route.pick_up);
+      const destinationLocation = await this.locationService.getLocationById(data.booking_route.destination);
+      const startPoint: Point = {
+        type: "Point",
+        coordinates: [pickUpLocation.coordinate["coordinates"][0], pickUpLocation.coordinate["coordinates"][1]],
+      };
+      const endPoint: Point = {
+        type: "Point",
+        coordinates: [
+          destinationLocation.coordinate["coordinates"][0],
+          destinationLocation.coordinate["coordinates"][1],
+        ],
+      };
+      const distance = this.locationService.calculateDistanceBetweenTwoLocations(startPoint, endPoint);
       return this.bookingRepository.save({
-        ...data,
+        orderedById: data.user_id,
+        vehicleType: data.vehicle_type,
+        pickupLocationId: data.booking_route.pick_up,
+        destinationLocationId: data.booking_route.destination,
+        driver_id: data.driver_id,
+        name: data.name,
+        phone: data.phone,
         status: BookingStatus.PENDING,
+        price: this.getPriceByDistance(distance)[data.vehicle_type],
       });
     } catch (error) {
       throw new InternalServerErrorException(error.message);
@@ -153,27 +185,29 @@ export class BookingService {
       return user.role === RoleEnum.DRIVER
         ? {
             id: booking.id,
-            pickUp: {
-              formatted_address: booking.pickupLocation.formattedAddress,
-              name: booking.pickupLocation.name,
-              location: {
-                lat: booking.pickupLocation.coordinate["coordinates"][1],
-                lng: booking.pickupLocation.coordinate["coordinates"][0],
+            booking_route: {
+              pick_up: {
+                formatted_address: booking.pickupLocation.formattedAddress,
+                name: booking.pickupLocation.name,
+                location: {
+                  lat: booking.pickupLocation.coordinate["coordinates"][1],
+                  lng: booking.pickupLocation.coordinate["coordinates"][0],
+                },
               },
-            },
-            destination: {
-              formatted_address: booking.destinationLocation.formattedAddress,
-              name: booking.destinationLocation.name,
-              location: {
-                lat: booking.destinationLocation.coordinate["coordinates"][1],
-                lng: booking.destinationLocation.coordinate["coordinates"][0],
+              destination: {
+                formatted_address: booking.destinationLocation.formattedAddress,
+                name: booking.destinationLocation.name,
+                location: {
+                  lat: booking.destinationLocation.coordinate["coordinates"][1],
+                  lng: booking.destinationLocation.coordinate["coordinates"][0],
+                },
               },
             },
             name: booking.name,
             phone: booking.phone,
             status: booking.status,
             payment_method: booking.paymentMethod,
-            vehicle_type: booking.driver.driverInfor.vehicleType,
+            vehicle_type: booking.driver?.driverInfor.vehicleType,
             price: booking.price,
           }
         : {
@@ -266,7 +300,7 @@ export class BookingService {
           status: booking.status,
           price: booking.price,
           finished_on: booking?.completedOn?.toISOString(),
-          vehicle_type: booking.driver.driverInfor.vehicleType,
+          vehicle_type: booking.driver?.driverInfor?.vehicleType,
           payment_method: booking.paymentMethod,
         };
       });
@@ -337,109 +371,103 @@ export class BookingService {
   //   }
   // }
 
-  // async getBookingDetail(bookingId: string, staff?: boolean): Promise<IBookingDetail> {
-  //   try {
-  //     const booking = await this.bookingRepository
-  //       .createQueryBuilder("booking")
-  //       .where("booking.id = :id", { id: bookingId })
-  //       .andWhere(
-  //         new Brackets((qb) => {
-  //           if (staff) {
-  //             qb.where("", {});
-  //           } else {
-  //             qb.where("booking.status = :completed", { completed: BookingStatus.COMPLETED }).orWhere(
-  //               "booking.status = :cancelled",
-  //               { cancelled: BookingStatus.CANCELLED }
-  //             );
-  //           }
-  //         })
-  //       )
-  //       .select([
-  //         "booking.id",
-  //         "booking.driverId",
-  //         "booking.paymentMethod",
-  //         "booking.startedOn",
-  //         "booking.completedOn",
-  //         "booking.price",
-  //         "booking.vehicleType",
-  //         "booking.driverRating",
-  //         "booking.passengerRating",
-  //         "booking.phone",
-  //         "booking.name",
-  //         "booking.status",
-  //       ])
-  //       .leftJoin("booking.driver", "driver")
-  //       .addSelect(["driver.fullName", "driver.avatar", "driver.phone"])
-  //       .leftJoin("booking.route", "route")
-  //       .addSelect(["route.id"])
-  //       .leftJoin("route.pickupLocation", "pickupLocation", "pickupLocation.id = route.pickupLocationId")
-  //       .addSelect(["pickupLocation.formattedAddress", "pickupLocation.name", "pickupLocation.coordinate"])
-  //       .leftJoin("route.destination", "destination", "destination.id = route.destinationId")
-  //       .addSelect(["destination.formattedAddress", "destination.name", "destination.coordinate"])
-  //       .getOne();
-  //     if (!booking) {
-  //       throw new NotFoundException("Booking not found");
-  //     }
-  //     return {
-  //       id: booking.id,
-  //       driver: {
-  //         name: booking.driver?.fullName,
-  //         avatar: booking.driver?.avatar,
-  //         phone: booking.driver?.phone,
-  //       },
-  //       booking_route: {
-  //         pick_up: {
-  //           formatted_address: booking.route.pickupLocation.formattedAddress,
-  //           name: booking.route.pickupLocation.name,
-  //           location: {
-  //             lat: booking.route.pickupLocation.coordinate["coordinates"][1],
-  //             lng: booking.route.pickupLocation.coordinate["coordinates"][0],
-  //           },
-  //         },
-  //         destination: {
-  //           formatted_address: booking.route.destination.formattedAddress,
-  //           name: booking.route.destination.name,
-  //           location: {
-  //             lat: booking.route.destination.coordinate["coordinates"][1],
-  //             lng: booking.route.destination.coordinate["coordinates"][0],
-  //           },
-  //         },
-  //       },
-  //       driverId: booking.driverId,
-  //       phone: booking.phone,
-  //       name: booking.name,
-  //       passenger_rating: booking.passengerRating,
-  //       driver_rating: booking.driverRating,
-  //       price: booking.price,
-  //       vehicle_type: booking.vehicleType,
-  //       payment_method: booking.paymentMethod,
-  //       started_on: booking?.startedOn?.toISOString(),
-  //       finished_on: booking?.completedOn?.toISOString(),
-  //       status: booking.status,
-  //     };
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(error.message);
-  //   }
-  // }
+  async getBookingDetail(bookingId: string, staff?: boolean): Promise<IBookingDetail> {
+    try {
+      const booking = await this.bookingRepository
+        .createQueryBuilder("booking")
+        .where("booking.id = :id", { id: bookingId })
+        .andWhere(
+          new Brackets((qb) => {
+            staff
+              ? qb.where("", {})
+              : qb
+                  .where("booking.status = :completed", { completed: BookingStatus.COMPLETED })
+                  .orWhere("booking.status = :cancelled", { cancelled: BookingStatus.CANCELLED });
+          })
+        )
+        .select([
+          "booking.id",
+          "booking.driverId",
+          "booking.paymentMethod",
+          "booking.startedOn",
+          "booking.completedOn",
+          "booking.price",
+          "booking.driverRating",
+          "booking.passengerRating",
+          "booking.phone",
+          "booking.name",
+          "booking.status",
+        ])
+        .leftJoin("booking.driver", "driver")
+        .addSelect(["driver.fullName", "driver.avatar", "driver.phone"])
+        .leftJoin("driver.driverInfor", "driverInfor")
+        .addSelect(["driverInfor.vehicleType"])
+        .leftJoinAndSelect("booking.pickupLocation", "pickupLocation")
+        .leftJoinAndSelect("booking.destinationLocation", "destinationLocation")
+        .getOne();
+      if (!booking) {
+        throw new NotFoundException("Booking not found");
+      }
+      return {
+        id: booking.id,
+        driver: {
+          name: booking.driver?.fullName,
+          avatar: booking.driver?.avatar,
+          phone: booking.driver?.phone,
+        },
+        booking_route: {
+          pick_up: {
+            formatted_address: booking.pickupLocation.formattedAddress,
+            name: booking.pickupLocation.name,
+            location: {
+              lat: booking.pickupLocation.coordinate["coordinates"][1],
+              lng: booking.pickupLocation.coordinate["coordinates"][0],
+            },
+          },
+          destination: {
+            formatted_address: booking.destinationLocation.formattedAddress,
+            name: booking.destinationLocation.name,
+            location: {
+              lat: booking.destinationLocation.coordinate["coordinates"][1],
+              lng: booking.destinationLocation.coordinate["coordinates"][0],
+            },
+          },
+        },
+        driverId: booking.driverId,
+        phone: booking.phone,
+        name: booking.name,
+        passenger_rating: booking.passengerRating,
+        driver_rating: booking.driverRating,
+        price: booking.price,
+        vehicle_type: booking.driver?.driverInfor?.vehicleType,
+        payment_method: booking.paymentMethod,
+        started_on: booking?.startedOn?.toISOString(),
+        finished_on: booking?.completedOn?.toISOString(),
+        status: booking.status,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
 
-  // async updateBookingDriver(bookingId: string, driverId: string, updatedById: string) {
-  //   try {
-  //     const booking = await this.bookingRepository.findOne({ where: { id: bookingId } });
-  //     const driver = await this.userService.getUserById(driverId);
-  //     const user = await this.userService.getUserById(updatedById);
-  //     if (booking.driverId !== null) {
-  //       throw new BadRequestException("Booking already has a driver");
-  //     }
-  //     if (!booking || !driver || !user) {
-  //       throw new NotFoundException("Booking, driver or user not found");
-  //     }
-  //     booking.driverId = driverId;
-  //     booking.updatedBy = updatedById;
-  //     return await this.bookingRepository.save(booking);
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(error.message);
-  //   }
-  // }
+  async updateBookingDriver(bookingId: string, driverId: string, updatedById: string) {
+    try {
+      const booking = await this.bookingRepository.findOne({ where: { id: bookingId } });
+      const driver = await this.userService.getUserById(driverId);
+      const user = await this.userService.getUserById(updatedById);
+      if (booking.driverId !== null) {
+        throw new BadRequestException("Booking already has a driver");
+      }
+      if (!booking || !driver || !user) {
+        throw new NotFoundException("Booking, driver or user not found");
+      }
+      booking.driverId = driverId;
+      booking.updatedBy = updatedById;
+      return await this.bookingRepository.save(booking);
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
 
   getPriceByDistance(distance: number) {
     //distance in meters
